@@ -63,23 +63,37 @@ namespace be_artwork_sharing_platform.Core.Services
                     CreatedAt= f.CreatedAt,
                     IsActive = f.IsActive,
                     IsDeleted = f.IsDeleted,
+                    StatusRequest = f.StatusRequest,
                 }).ToList();
             return request;
         }
 
-        public Task UpdateRquest(long id, UpdateRequest updateRequest)
+        public async Task UpdateRquest(long id, UpdateRequest updateRequest)
         {
-            throw new NotImplementedException();
+            var request = _context.RequestOrders.FirstOrDefault(f => f.Id == id);
+            if(request is not null)
+            {
+                request.IsActive = updateRequest.IsActive;
+                request.IsDeleted = updateRequest.IsDeleted;
+            }
+            _context.Update(request);
+            _context.SaveChanges();
         }
 
-        public async Task CancelRequest(long id, string user_Name)
+        public async Task CancelRequest(long id)
         {
-            var request = _context.RequestOrders.Where(r => r.Id == id && r.UserName_Sender == user_Name);
+            var request = _context.RequestOrders.FirstOrDefault(r => r.Id == id);
             if(request is not null)
             {
                 _context.Remove(request);
                 _context.SaveChanges();
             }
+        }
+
+        public async Task<bool> GetStatusRequestByUserNameRequest(long id)
+        {
+            var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id);
+            return checkStatusRequest.StatusRequest;
         }
     }
 }

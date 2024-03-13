@@ -32,7 +32,6 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                string userNameRequest = await _authService.GetCurrentUserName(userName);
                 string fullNameResquest = await _authService.GetCurrentFullName(userName);
                 string fullNameReceivier = await _authService.GetCurrentFullNameByUserId(user_Id);
                 if(userId == user_Id)
@@ -47,7 +46,7 @@ namespace be_artwork_sharing_platform.Controllers
                 else
                 {
                     _logService.SaveNewLog(userId, "Send Request Order");
-                    _requestOrderService.SendRequesrOrder(sendRequest, userNameRequest, user_Id, fullNameResquest, fullNameReceivier);
+                    _requestOrderService.SendRequesrOrder(sendRequest, userName, user_Id, fullNameResquest, fullNameReceivier);
                     return Ok(new GeneralServiceResponseDto()
                     {
                         IsSucceed = true,
@@ -70,8 +69,7 @@ namespace be_artwork_sharing_platform.Controllers
             try
             {
                 string userName = HttpContext.User.Identity.Name;
-                string currentUserName = await _authService.GetCurrentUserName(userName);
-                var result = _requestOrderService.GetMineRequestByUserName(currentUserName);
+                var result = _requestOrderService.GetMineRequestByUserName(userName);
                 return Ok(result);
             }
             catch
@@ -98,7 +96,7 @@ namespace be_artwork_sharing_platform.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPatch]
         [Route("cancel-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
         public async Task<IActionResult> CancelRequest(long id)
@@ -107,8 +105,34 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                await _requestOrderService.CancelRequest(id, userName);
-                return Ok("Cancel Request Successfully");
+                var checkStatusRequest = await _requestOrderService.GetStatusRequestByUserNameRequest(id);
+                if(checkStatusRequest == true)
+                {
+                    return BadRequest("You cannot cancel your request because your request is being fulfilled by the creator");
+                }
+                else
+                {
+                    await _requestOrderService.CancelRequest(id);
+                    return Ok("Cancel Request Successfully");
+                }
+            }
+            catch
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpPut]
+        [Route("update-request")]
+        [Authorize(Roles = StaticUserRole.CREATOR)]
+        public async Task<IActionResult> UpdatelRequest(long id, UpdateRequest updateRequest)
+        {
+            try
+            {
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                _requestOrderService.UpdateRquest(id, updateRequest);
+                return Ok("Update Request Successfully");
             }
             catch
             {
