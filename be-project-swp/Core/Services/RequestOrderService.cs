@@ -1,4 +1,5 @@
 ﻿using be_artwork_sharing_platform.Core.DbContext;
+using be_artwork_sharing_platform.Core.Dtos.General;
 using be_artwork_sharing_platform.Core.Dtos.RequestOrder;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
@@ -74,7 +75,6 @@ namespace be_artwork_sharing_platform.Core.Services
             if(request is not null)
             {
                 request.IsActive = updateRequest.IsActive;
-                request.IsDeleted = updateRequest.IsDeleted;
             }
             _context.Update(request);
             _context.SaveChanges();
@@ -92,10 +92,23 @@ namespace be_artwork_sharing_platform.Core.Services
             _context.SaveChanges();
         }
 
+        public int DeleteRequestBySender(long id, string user_Name)
+        {
+            var request = _context.RequestOrders.FirstOrDefault(o => o.Id == id && o.UserName_Sender == user_Name);
+            if(request is not null )
+            {
+                _context.Remove(request);
+                return _context.SaveChanges();
+            }
+            return 0;
+        }
+
         public bool GetStatusRequestByUserNameRequest(long id, string userName)
         {
             var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id && r.UserName_Sender == userName);
             return checkStatusRequest.StatusRequest;
         }
+
+
     }
 }

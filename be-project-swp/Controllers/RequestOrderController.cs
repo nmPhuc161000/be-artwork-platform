@@ -116,6 +116,26 @@ namespace be_artwork_sharing_platform.Controllers
             }
         }
 
+        [HttpDelete]
+        [Route("delete-request")]
+        [Authorize(Roles = StaticUserRole.CREATOR)]
+        public async Task<IActionResult> DeleteRequest(long id)
+        {
+            try
+            {
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                var result = _requestOrderService.DeleteRequestBySender(id, userName);
+                if (result == 0) return NotFound("Request Not Found");
+                await _logService.SaveNewLog(userId, "Delete Request");
+                return Ok("Delete Request Successfully");
+            }
+            catch
+            {
+                return BadRequest("Delete Request Failed");
+            }
+        }
+
         [HttpPut]
         [Route("update-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]

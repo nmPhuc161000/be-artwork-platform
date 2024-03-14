@@ -7,8 +7,6 @@ public class CancelRequest
 public class UpdateRequest
 {
     public bool IsActive { get; set; }
-    public bool IsDeleted { get; set; }
-
 }
 
 public class UpdateStatusRequest
