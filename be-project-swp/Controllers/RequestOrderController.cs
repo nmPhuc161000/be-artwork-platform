@@ -33,6 +33,7 @@ namespace be_artwork_sharing_platform.Controllers
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
                 string fullNameResquest = await _authService.GetCurrentFullName(userName);
+                string currentUserNameRequest = await _authService.GetCurrentUserName(userName);
                 string fullNameReceivier = await _authService.GetCurrentFullNameByUserId(user_Id);
                 if(userId == user_Id)
                 {
@@ -45,8 +46,8 @@ namespace be_artwork_sharing_platform.Controllers
                 }
                 else
                 {
-                    _logService.SaveNewLog(userId, "Send Request Order");
-                    _requestOrderService.SendRequesrOrder(sendRequest, userName, user_Id, fullNameResquest, fullNameReceivier);
+                    await _logService.SaveNewLog(userId, "Send Request Order");
+                    await _requestOrderService.SendRequesrOrder(sendRequest, currentUserNameRequest, user_Id, fullNameResquest, fullNameReceivier);
                     return Ok(new GeneralServiceResponseDto()
                     {
                         IsSucceed = true,
@@ -99,22 +100,15 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpPatch]
         [Route("cancel-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> CancelRequest(long id)
+        public async Task<IActionResult> CancelRequest(long id, CancelRequest cancelRequest)
         {
             try
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                var checkStatusRequest = await _requestOrderService.GetStatusRequestByUserNameRequest(id);
-                if(checkStatusRequest == true)
-                {
-                    return BadRequest("You cannot cancel your request because your request is being fulfilled by the creator");
-                }
-                else
-                {
-                    await _requestOrderService.CancelRequest(id);
-                    return Ok("Cancel Request Successfully");
-                }
+                await _logService.SaveNewLog(userId, "Cancel Request");
+                await _requestOrderService.CancelRequestByReceivier(id, cancelRequest);
+                return Ok("Cancel Request Successfully");
             }
             catch
             {
@@ -131,7 +125,11 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                _requestOrderService.UpdateRquest(id, updateRequest);
+                var result = _requestOrderService.UpdateRquest(id, updateRequest);
+                if(result == null)
+                {
+                    return NotFound("Request Order Not Found");
+                }
                 return Ok("Update Request Successfully");
             }
             catch

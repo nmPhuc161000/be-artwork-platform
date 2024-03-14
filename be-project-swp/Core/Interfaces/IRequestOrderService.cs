@@ -11,7 +11,7 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         IEnumerable<ReceiveRequestDto> GetMineOrderByUserId(string user_Name);
         IEnumerable<RequestOrderDto> GetMineRequestByUserName(string user_Id);
         Task UpdateRquest(long id, UpdateRequest updateRequest);
-        Task CancelRequest (long id);
-        Task<bool> GetStatusRequestByUserNameRequest(long id);
+        Task CancelRequestByReceivier(long id, CancelRequest cancelRequest);
+        bool GetStatusRequestByUserNameRequest(long id, string userNames);
     }
 }

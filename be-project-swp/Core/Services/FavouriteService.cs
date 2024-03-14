@@ -60,11 +60,8 @@ namespace be_artwork_sharing_platform.Core.Services
         {
             var favourite = _context.Favorites.FirstOrDefault(f => f.Id == favourite_Id && f.User_Id == user_Id);
             if (favourite == null) return 0;
-            else
-            {
-                _context.Remove(favourite);
-                return _context.SaveChanges();
-            }
+            _context.Remove(favourite);
+            return _context.SaveChanges();
         }
 
         public long GetFavouriteIdByUserId(string user_Id)
