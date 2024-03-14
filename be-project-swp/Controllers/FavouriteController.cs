@@ -66,7 +66,7 @@ namespace be_artwork_sharing_platform.Controllers
                     else
                     {
                         _favouriteService.AddToFavourite(userId, artwork_Id, favouriteDto.Id);
-                        _logService.SaveNewLog(userNameCurrent, "Add Artwork to your Favourite Successfully");
+                        await _logService.SaveNewLog(userNameCurrent, "Add Artwork to your Favourite Successfully");
                         return Ok(new GeneralServiceResponseDto()
                         {
                             IsSucceed = true,
@@ -103,7 +103,7 @@ namespace be_artwork_sharing_platform.Controllers
                 }
                 else
                 {
-                    _logService.SaveNewLog(userName, "Remove Artwork from your Favourite Successfully");
+                    await _logService.SaveNewLog(userName, "Remove Artwork from your Favourite Successfully");
                     return Ok(new GeneralServiceResponseDto()
                     {
                         IsSucceed = true,

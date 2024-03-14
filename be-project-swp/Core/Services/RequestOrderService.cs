@@ -78,21 +78,23 @@ namespace be_artwork_sharing_platform.Core.Services
             }
             _context.Update(request);
             _context.SaveChanges();
+            
         }
 
-        public async Task CancelRequest(long id)
+        public async Task CancelRequestByReceivier(long id, CancelRequest cancelRequest)
         {
             var request = _context.RequestOrders.FirstOrDefault(r => r.Id == id);
             if(request is not null)
             {
-                _context.Remove(request);
-                _context.SaveChanges();
+                request.IsDeleted = cancelRequest.IsDelete;
             }
+            _context.Update(request);
+            _context.SaveChanges();
         }
 
-        public async Task<bool> GetStatusRequestByUserNameRequest(long id)
+        public bool GetStatusRequestByUserNameRequest(long id, string userName)
         {
-            var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id);
+            var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id && r.UserName_Sender == userName);
             return checkStatusRequest.StatusRequest;
         }
     }
