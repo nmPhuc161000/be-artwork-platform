@@ -14,6 +14,7 @@ using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
+using be_project_swp.Core.Dtos.Zalopays;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     var connection = builder.Configuration.GetConnectionString("local");
     options.UseSqlServer(connection);
 });
+
+//Zalo Pay
+builder.Services.Configure<ZaloPayConfig>(
+    builder.Configuration.GetSection(ZaloPayConfig.ConfigName));
 
 //Dependency Injection
 builder.Services.AddScoped<ILogService, LogService>();

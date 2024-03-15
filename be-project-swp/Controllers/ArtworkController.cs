@@ -69,7 +69,7 @@ namespace be_artwork_sharing_platform.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<IActionResult> GetById(long id)
+        public async Task<IActionResult> GetById([FromRoute]long id)
         {
             try
             {

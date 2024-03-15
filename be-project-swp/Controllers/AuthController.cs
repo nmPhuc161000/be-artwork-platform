@@ -1,4 +1,4 @@
-﻿using be_artwork_sharing_platform.Core.Dtos.Auth;
+﻿ using be_artwork_sharing_platform.Core.Dtos.Auth;
 using be_artwork_sharing_platform.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
