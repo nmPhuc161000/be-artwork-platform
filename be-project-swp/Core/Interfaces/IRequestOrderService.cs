@@ -17,5 +17,6 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         Task UpdateStatusRequest(long id, string user_Id, UpdateStatusRequest updateStatusRequest);
         int DeleteRequestBySender(long id, string user_Name);
         bool GetStatusRequestByUserNameRequest(long id, string userNames);
+        bool GetActiveRequestByUserNameRequest(long id, string userNames);
     }
 }
