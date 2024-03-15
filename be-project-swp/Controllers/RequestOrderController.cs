@@ -23,9 +23,27 @@ namespace be_artwork_sharing_platform.Controllers
             _authService = authService;
         }
 
+        [HttpGet]
+        [Route("get-by-id")]
+        [Authorize(Roles = StaticUserRole.CREATOR)]
+        public async Task<IActionResult> GetRequestOrderById(long id)
+        {
+            try
+            {
+                var result = await _requestOrderService.GetRequestById(id);
+                if (result == null)
+                    return NotFound("Not found Request");
+                return Ok(result);
+            }
+            catch
+            {
+                return BadRequest("Get Request Failed");
+            }
+        }
+
         [HttpPost]
         [Route("send-request")]
-        [Authorize]
+        [Authorize(Roles = StaticUserRole.CREATOR)]
         public async Task<IActionResult> SendRequestOrder(SendRequest sendRequest, string user_Id)
         {
             try
@@ -100,15 +118,56 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpPatch]
         [Route("cancel-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> CancelRequest(long id, CancelRequest cancelRequest)
+        public async Task<IActionResult> CancelRequest(long id)
         {
             try
             {
+                var cancelRequest = new CancelRequest();
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
                 await _logService.SaveNewLog(userId, "Cancel Request");
-                await _requestOrderService.CancelRequestByReceivier(id, cancelRequest);
+                await _requestOrderService.CancelRequestByReceivier(id, cancelRequest, userId);
                 return Ok("Cancel Request Successfully");
+            }
+            catch
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpPatch]
+        [Route("update-request")]
+        [Authorize(Roles = StaticUserRole.CREATOR)]
+        public async Task<IActionResult> UpdateRequest(long id)
+        {
+            try
+            {
+                var updateRequest = new UpdateRequest();
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                await _logService.SaveNewLog(userId, "Update Request");
+                await _requestOrderService.UpdateRquest(id, updateRequest, userId);
+                return Ok("Update Request Successfully");
+            }
+            catch
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpPatch]
+        [Route("update-status-request")]
+        [Authorize(Roles = StaticUserRole.CREATOR)]
+        public async Task<IActionResult> UpdateStatusRequest(long id)
+        {
+            try
+            {
+                var updatelStatusRequest = new UpdateStatusRequest();
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                await _logService.SaveNewLog(userId, "Update Status Request");
+                await _requestOrderService.UpdateStatusRequest(id, userId, updatelStatusRequest);
+                return Ok("Update Request Successfully");
             }
             catch
             {
@@ -133,28 +192,6 @@ namespace be_artwork_sharing_platform.Controllers
             catch
             {
                 return BadRequest("Delete Request Failed");
-            }
-        }
-
-        [HttpPut]
-        [Route("update-request")]
-        [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> UpdatelRequest(long id, UpdateRequest updateRequest)
-        {
-            try
-            {
-                string userName = HttpContext.User.Identity.Name;
-                string userId = await _authService.GetCurrentUserId(userName);
-                var result = _requestOrderService.UpdateRquest(id, updateRequest);
-                if(result == null)
-                {
-                    return NotFound("Request Order Not Found");
-                }
-                return Ok("Update Request Successfully");
-            }
-            catch
-            {
-                return BadRequest("Something went wrong");
             }
         }
     }

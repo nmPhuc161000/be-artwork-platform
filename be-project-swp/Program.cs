@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using be_project_swp.Core.Dtos.Zalopays;
+using be_project_swp.Core.Interfaces;
+using be_project_swp.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,10 +34,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connection);
 });
 
-//Zalo Pay
-builder.Services.Configure<ZaloPayConfig>(
-    builder.Configuration.GetSection(ZaloPayConfig.ConfigName));
-
 //Dependency Injection
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -44,6 +42,12 @@ builder.Services.AddScoped<IArtworkService, ArtworkService>();
 builder.Services.AddScoped<IFavouriteService, FavouriteService>();
 builder.Services.AddScoped<IRequestOrderService, RequestOrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+//Zalo Pay
+builder.Services.Configure<ZaloPayConfig>(
+    builder.Configuration.GetSection(ZaloPayConfig.ConfigName));
 
 //Add Identity
 builder.Services
