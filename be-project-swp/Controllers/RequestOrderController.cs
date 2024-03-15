@@ -184,10 +184,19 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                var result = _requestOrderService.DeleteRequestBySender(id, userName);
-                if (result == 0) return NotFound("Request Not Found");
-                await _logService.SaveNewLog(userId, "Delete Request");
-                return Ok("Delete Request Successfully");
+                bool checkStatusRequest = _requestOrderService.GetStatusRequestByUserNameRequest(id, userName);
+                bool checkActiveRequest = _requestOrderService.GetActiveRequestByUserNameRequest(id, userName);
+                if(checkStatusRequest || checkActiveRequest == false)
+                {
+                    return BadRequest("Your request has been confirmed by the receiver or is in progress so do not delete this request!!!!!");
+                }
+                else
+                {
+                    var result = _requestOrderService.DeleteRequestBySender(id, userName);
+                    if (result == 0) return NotFound("Request Not Found");
+                    await _logService.SaveNewLog(userId, "Delete Request");
+                    return Ok("Delete Request Successfully");
+                }
             }
             catch
             {

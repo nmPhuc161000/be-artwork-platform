@@ -17,6 +17,29 @@ namespace be_artwork_sharing_platform.Core.Services
             _context = context;
         }
 
+        public async Task<RequestOrderDto> GetRequestById(long id)
+        {
+            var request = await _context.RequestOrders.FirstOrDefaultAsync(o => o.Id == id);
+            if (request == null)
+            {
+                return null;
+            }
+            var requestDto = new RequestOrderDto()
+            {
+                Id = request.Id,
+                FullName_Sender = request.UserName_Sender,
+                FullName_Receivier = request.FullName_Receivier,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                Text = request.Text,
+                CreatedAt = request.CreatedAt,
+                StatusRequest = request.StatusRequest,
+                IsActive = request.IsActive,
+                IsDeleted = request.IsDeleted,
+            };
+            return requestDto;
+        }
+
         public async Task SendRequesrOrder(SendRequest sendRequest, string userName_Request, string userId_Receivier, string fullName_Sender, string fullName_Receivier)
         {
             var request = new RequestOrder
@@ -102,44 +125,27 @@ namespace be_artwork_sharing_platform.Core.Services
             _context.SaveChanges();
         }
 
-        public int DeleteRequestBySender(long id, string user_Name)
-        {
-            var request = _context.RequestOrders.Where(o => o.Id == id && o.UserName_Sender == user_Name);
-            if(request is not null )
-            {
-                _context.Remove(request);
-                return _context.SaveChanges();
-            }
-            return 0;
-        }
-
         public bool GetStatusRequestByUserNameRequest(long id, string userName)
         {
             var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id && r.UserName_Sender == userName);
             return checkStatusRequest.StatusRequest;
         }
 
-        public async Task<RequestOrderDto> GetRequestById(long id)
+        public bool GetActiveRequestByUserNameRequest(long id, string userName)
         {
-            var request = await _context.RequestOrders.FirstOrDefaultAsync(o => o.Id == id);
-            if(request == null)
+            var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id && r.UserName_Sender == userName);
+            return checkStatusRequest.IsActive;
+        }
+
+        public int DeleteRequestBySender(long id, string user_Name)
+        {
+            var request = _context.RequestOrders.FirstOrDefault(o => o.Id == id && o.UserName_Sender == user_Name);
+            if (request is not null)
             {
-                return null;
+                _context.Remove(request);
+                return _context.SaveChanges();
             }
-            var requestDto = new RequestOrderDto()
-            {
-                Id = request.Id,
-                FullName_Sender = request.UserName_Sender,
-                FullName_Receivier = request.FullName_Receivier,
-                Email = request.Email,
-                PhoneNumber = request.PhoneNumber,
-                Text = request.Text,
-                CreatedAt = request.CreatedAt,
-                StatusRequest = request.StatusRequest,
-                IsActive = request.IsActive,
-                IsDeleted = request.IsDeleted,
-            };
-            return requestDto;
+            return 0;
         }
     }
 }
