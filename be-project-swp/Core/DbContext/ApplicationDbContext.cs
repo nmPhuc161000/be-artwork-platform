@@ -19,6 +19,8 @@ namespace be_artwork_sharing_platform.Core.DbContext
         public DbSet<ApplicationUser> Users {  get; set; }
         public DbSet<Favourite> Favorites { get; set; }
         public DbSet<RequestOrder> RequestOrders { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<Order> Orders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

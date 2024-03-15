@@ -24,4 +24,8 @@
     <PackageReference Include="vng.zalo.ZaloDotNetSDK" Version="2.1.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Core\Dtos\Order\" />
+  </ItemGroup>
+
 </Project>

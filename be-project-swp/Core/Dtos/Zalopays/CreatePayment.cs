@@ -2,12 +2,12 @@
 
 namespace be_project_swp.Core.Dtos.Zalopays
 {
-    /*public class CreatePayment : IRequest<BaseResultWithData<PaymentLinkDtos>>
+ /*   public class CreatePayment : IRequest<BaseResultWithData<PaymentLinkDtos>>
     {
         public string PaymentContent { get; set; } = string.Empty;
         public string PaymentCurrency { get; set; } = string.Empty;
         public string PaymentRefId { get; set; } = string.Empty;
-        public decimal? RequiredAmount { get; set; }
+        public double RequiredAmount { get; set; }
         public DateTime? PaymentDate { get; set; } = DateTime.Now;
         public DateTime? ExpireDate { get; set; } = DateTime.Now.AddMinutes(15);
         public string? PaymentLanguage { get; set; } = string.Empty;
