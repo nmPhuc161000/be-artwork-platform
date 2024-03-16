@@ -15,6 +15,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using be_project_swp.Core.Entities;
+using be_project_swp.Core.Base;
 
 namespace be_artwork_sharing_platform.Core.Services
 {
@@ -134,7 +135,6 @@ namespace be_artwork_sharing_platform.Core.Services
             var role = await _userManager.GetRolesAsync(user);
             var userInfo = GeneralUserInfoObject(user, role);
             await _logService.SaveNewLog(user.UserName, "New Login");
-
             return new LoginServiceResponceDto()
             {
                 NewToken = newToken,
@@ -298,12 +298,14 @@ namespace be_artwork_sharing_platform.Core.Services
             return null;
         }
 
-        public async Task<bool> GetStatusUser(string username)
+        public bool GetStatusUser(string username)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
-            if (user is not null)
+            var user = _context.Users.FirstOrDefault(u => u.UserName == username);
+            if(user is not null)
+            {
                 return user.IsActive;
-            return false;
+            }
+            return user.IsActive;
         }
 
         private UserInfoResult GeneralUserInfoObject(ApplicationUser user, IList<string> roles)

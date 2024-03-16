@@ -91,6 +91,11 @@ namespace be_artwork_sharing_platform.Controllers
                 var accpetArtwork = new AcceptArtwork();
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
+                var checkIsDelete = _artworkService.GetStatusIsDeleteArtwork(id);
+                if(checkIsDelete is true)
+                {
+                    return BadRequest("Artwork was refuse so you can accept this artwork");
+                }
                 await _logService.SaveNewLog(userId, "Accept Artwork");
                 await _artworkService.AcceptArtwork(id, accpetArtwork);
                 return Ok("Accept Artwork Successfully");
@@ -109,6 +114,11 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
+                var checkIsActive = _artworkService.GetStatusIsActiveArtwork(id);
+                if( checkIsActive is true)
+                {
+                    return BadRequest("Artwork was accpet so you can refuse this artwork");
+                }
                 await _logService.SaveNewLog(userId, "Refuse Artwork");
                 await _artworkService.RefuseArtwork(id, refuseArtwork);
                 return Ok("Refuse Artwork Successfully");
