@@ -251,5 +251,12 @@ namespace be_artwork_sharing_platform.Core.Services
             var status = _context.Artworks.FirstOrDefault(b => b.Id == id);
             return status.IsDeleted;
         }
+
+        public int DeleteSelectedArtworks(List<long> selectedIds)
+        {
+            var artworksToDelete = _context.Artworks.Where(a => selectedIds.Contains(a.Id)).ToList();
+            _context.RemoveRange(artworksToDelete);
+            return _context.SaveChanges();
+        }
     }
 }

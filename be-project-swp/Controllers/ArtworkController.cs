@@ -214,6 +214,43 @@ namespace be_artwork_sharing_platform.Controllers
             }
         }
 
+        [HttpDelete]
+        [Route("delete-by-id-select")]
+        [Authorize(Roles = StaticUserRole.CREATOR)]
+        public async Task<IActionResult> Delete([FromBody] List<long> ids)
+        {
+            try
+            {
+                string userName = HttpContext.User.Identity.Name;
+
+                int deletedCount = _artworkService.DeleteSelectedArtworks(ids);
+
+                if (deletedCount > 0)
+                {
+                    await _logService.SaveNewLog(userName, $"Deleted {deletedCount} Artwork(s)");
+                    return Ok(new GeneralServiceResponseDto
+                    {
+                        IsSucceed = true,
+                        StatusCode = 200,
+                        Message = $"Deleted {deletedCount} Artwork(s) Successfully"
+                    });
+                }
+                else
+                {
+                    return NotFound(new GeneralServiceResponseDto
+                    {
+                        IsSucceed = true,
+                        StatusCode = 404,
+                        Message = "No Artwork(s) Found to Delete"
+                    });
+                }
+            }
+            catch
+            {
+                return BadRequest("Delete Failed");
+            }
+        }
+
         [HttpPut]
         [Route("update-artwork")]
         [Authorize(Roles = StaticUserRole.CREATOR)]

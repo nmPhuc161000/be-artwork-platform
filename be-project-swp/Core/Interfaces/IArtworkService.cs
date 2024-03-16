@@ -15,6 +15,8 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         Task<IEnumerable<GetArtworkByUserId>> GetArtworkByUserId(string user_Id);
         Task CreateArtwork(CreateArtwork artworkDto, string user_Id, string user_Name);
         int Delete(long id);
+        int DeleteSelectedArtworks(List<long> selectedIds);
+
         Task UpdateArtwork(long id, UpdateArtwork updateArtwork);
         Task AcceptArtwork(long id, AcceptArtwork acceptArtwork);
         Task RefuseArtwork(long id, RefuseArtwork refuseArtwork);
