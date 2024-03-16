@@ -7,6 +7,6 @@ public class AcceptArtwork
 
 public class RefuseArtwork
 {
-    public string Reason { get; set; }
+    public string Reason { get; set; } = "No Accept By Admin";
 }
 
