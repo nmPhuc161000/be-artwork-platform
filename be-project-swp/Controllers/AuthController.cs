@@ -40,17 +40,20 @@ namespace be_artwork_sharing_platform.Controllers
         {
             try
             {
-                var checkIsActive = _authService.GetStatusUser(loginDto.UserName);
-                if(checkIsActive is true)
+                var login = await _authService.LoginAsync(loginDto);
+                if (login is null)
                 {
-                    var login = await _authService.LoginAsync(loginDto);
-                    if(login is null)
-                    {
-                        return NotFound("Username or Password incorrect");
-                    }
-                    return Ok(login);
+                    return NotFound("Username or Password incorrect");
                 }
-                return BadRequest("Your account have been lock");
+                else
+                {
+                    var checkIsActive = _authService.GetStatusUser(loginDto.UserName);
+                    if (checkIsActive is true)
+                    {
+                        return Ok(login);
+                    }
+                    return BadRequest("Your account have been lock");
+                }
             }
                 
             catch
