@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace be_artwork_sharing_platform.Core.Entities
 {
     [Table("artworks")]
-    public class Artwork : BaseEntity<long>
+    public class Artwork
     {
+        public long Id { get; set; }
         public string Name { get; set; }
         public string Category_Name { get; set; } = string.Empty;
         public string Full_Name { get; set; }
@@ -13,6 +14,11 @@ namespace be_artwork_sharing_platform.Core.Entities
         public string Url_Image { get; set; }
         public double Price { get; set; }
         public long? Category_Id { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public bool IsActive { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
+        public string ReasonRefuse { get; set; } = "Đang được xử lí";
 
         //Relationship
         public string User_Id { get; set; }

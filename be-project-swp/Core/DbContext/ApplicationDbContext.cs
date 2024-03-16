@@ -1,4 +1,5 @@
 ﻿using be_artwork_sharing_platform.Core.Constancs;
+using be_artwork_sharing_platform.Core.Dtos.User;
 using be_artwork_sharing_platform.Core.Entities;
 using be_project_swp.Core.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -19,13 +20,12 @@ namespace be_artwork_sharing_platform.Core.DbContext
         public DbSet<ApplicationUser> Users {  get; set; }
         public DbSet<Favourite> Favorites { get; set; }
         public DbSet<RequestOrder> RequestOrders { get; set; }
-        public DbSet<Payment> Payments { get; set; }
-        public DbSet<Order> Orders { get; set; }
+/*        public DbSet<Payment> Payments { get; set; }
+        public DbSet<Order> Orders { get; set; }*/
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-
             //1
             builder.Entity<ApplicationUser>(e =>
             {
@@ -82,7 +82,6 @@ namespace be_artwork_sharing_platform.Core.DbContext
                 .HasOne(f => f.Artworks)
                 .WithMany(f => f.Favourites)
                 .OnDelete(DeleteBehavior.NoAction);
-
         }
     }
 }

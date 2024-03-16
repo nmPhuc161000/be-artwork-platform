@@ -16,6 +16,7 @@ namespace be_artwork_sharing_platform.Core.AutoMapperConfig
 
             //Artwork
             CreateMap<Artwork, ArtworkDto>();
+            CreateMap<Artwork, GetArtworkByUserId>();
 
             //User
             CreateMap<UpdateInformation, ApplicationUser>();
