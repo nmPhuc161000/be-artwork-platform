@@ -19,6 +19,12 @@ using be_project_swp.Core.Interfaces;
 using be_project_swp.Core.Services;
 using Catel.Services;
 using be_project_swp.Core.Dtos.Auth;
+using be_project_swp.Core.Dtos;
+using System.Configuration;
+using System.Net;
+using System.Net.Mail;
+using System.Threading.Tasks;
+using be_project_swp.Core.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,7 +52,10 @@ builder.Services.AddScoped<IRequestOrderService, RequestOrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddSingleton<IHostInitialization, RoleInitializationModule>();
+
+
+//Email
+
 
 //Zalo Pay
 builder.Services.Configure<ZaloPayConfig>(
@@ -88,10 +97,6 @@ builder.Services
             ClockSkew = TimeSpan.Zero
         };
     });
-
-//Email
-var emailConfig = builder.Configuration.GetSection("EmailConfiguration");
-builder.Services.AddSingleton(emailConfig);
 
 //Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));

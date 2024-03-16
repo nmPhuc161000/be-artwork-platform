@@ -1,4 +1,5 @@
 ﻿using be_artwork_sharing_platform.Core.Dtos.User;
+using be_artwork_sharing_platform.Core.Entities;
 
 namespace be_artwork_sharing_platform.Core.Interfaces
 {
