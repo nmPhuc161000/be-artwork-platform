@@ -4,6 +4,7 @@ using be_artwork_sharing_platform.Core.DbContext;
 using be_artwork_sharing_platform.Core.Dtos.Artwork;
 using be_artwork_sharing_platform.Core.Dtos.Category;
 using be_artwork_sharing_platform.Core.Dtos.General;
+using be_artwork_sharing_platform.Core.Dtos.User;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
 using be_artwork_sharing_platform.Core.Services;
@@ -25,14 +26,16 @@ namespace be_project_swp.Controllers
         private readonly IArtworkService _artworkService;
         private readonly IAuthService _authService;
         private readonly ILogService _logService;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public AdminController(IArtworkService artworkService, IAuthService authService, ILogService logService, IMapper mapper)
+        public AdminController(IArtworkService artworkService, IAuthService authService, ILogService logService, IMapper mapper, IUserService userService)
         {
             _artworkService = artworkService;
             _authService = authService;
             _logService = logService;
             _mapper = mapper;
+            _userService = userService;
         }
 
         [HttpPost]
@@ -92,6 +95,29 @@ namespace be_project_swp.Controllers
             catch
             {
                 return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpPatch]
+        [Route("update-status-user")]
+        [Authorize(Roles = StaticUserRole.ADMIN)]
+        public async Task<IActionResult> UpdateStatusUser(UpdateStatusUser updateUser, string user_Id)
+        {
+            try
+            {
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                if (userId == user_Id)
+                {
+                    return BadRequest("You can not update status of you");
+                }
+                await _logService.SaveNewLog(userName, "Update Status User");
+                await _userService.UpdateUser(updateUser, user_Id);
+                return Ok("Update Status User Successfully");
+            }
+            catch
+            {
+                return BadRequest("Update Status User Failed");
             }
         }
     }

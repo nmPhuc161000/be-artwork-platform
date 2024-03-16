@@ -2,9 +2,13 @@
 using be_artwork_sharing_platform.Core.Dtos.General;
 using be_artwork_sharing_platform.Core.Dtos.User;
 using be_artwork_sharing_platform.Core.Interfaces;
+using be_project_swp.Core.Dtos.User;
+using be_project_swp.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mail;
+using System.Net;
 
 
 namespace be_artwork_sharing_platform.Controllers
@@ -16,12 +20,14 @@ namespace be_artwork_sharing_platform.Controllers
         private readonly IAuthService _authService;
         private readonly ILogService _logService;
         private readonly IUserService _userService;
+        private readonly IConfiguration _config;
 
-        public UserController(IAuthService authService, ILogService logService, IUserService userService)
+        public UserController(IAuthService authService, ILogService logService, IUserService userService, IConfiguration config)
         {
             _authService = authService;
             _logService = logService;
             _userService = userService;
+            _config = config;
         }
 
         //Route -> List of all users with details
@@ -68,29 +74,6 @@ namespace be_artwork_sharing_platform.Controllers
             await _logService.SaveNewLog(userName, "Update Information User");
             await _userService.UpdateInformation(updateUser, userId);
             return Ok("Update Successfully");
-        }
-
-        [HttpPatch]
-        [Route("update-status-user")]
-        [Authorize(Roles = StaticUserRole.ADMIN)]
-        public async Task<IActionResult> UpdateStatusUser(UpdateStatusUser updateUser, string user_Id)
-        {
-            try
-            {
-                string userName = HttpContext.User.Identity.Name;
-                string userId = await _authService.GetCurrentUserId(userName);
-                if(userId == user_Id)
-                {
-                    return BadRequest("You can not update status of you");
-                }
-                await _logService.SaveNewLog(userName, "Update Status User");
-                await _userService.UpdateUser(updateUser, user_Id);
-                return Ok("Update Status User Successfully");
-            }
-            catch
-            {
-                return BadRequest("Update Status User Failed");
-            }
         }
 
         [HttpPut]
@@ -148,6 +131,5 @@ namespace be_artwork_sharing_platform.Controllers
                 return BadRequest("Error to change password");
             }
         }
-
     }
 }
