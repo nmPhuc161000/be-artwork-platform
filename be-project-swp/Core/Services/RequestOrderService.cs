@@ -69,6 +69,7 @@ namespace be_artwork_sharing_platform.Core.Services
                     CreatedAt = f.CreatedAt,
                     IsActive = f.IsActive,
                     IsDeleted = f.IsDeleted,
+                    StatusRequest = f.StatusRequest,
                 }).ToList();
             return receivier;
         }
