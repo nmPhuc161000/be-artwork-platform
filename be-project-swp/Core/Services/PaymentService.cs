@@ -33,7 +33,7 @@ namespace be_project_swp.Core.Services
                 PaymentDestinationId = request.PaymentDestinationId,
                 InsertUser = userId*/
             };
-            _context.Payments.Add(payment);
+/*            _context.Payments.Add(payment);*/
             await _context.SaveChangesAsync(cancellationToken);
             return result;
         }

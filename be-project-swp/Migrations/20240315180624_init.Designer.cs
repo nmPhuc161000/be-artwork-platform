@@ -12,7 +12,7 @@ using be_artwork_sharing_platform.Core.DbContext;
 namespace be_project_swp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240313134314_init")]
+    [Migration("20240315180624_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -282,6 +282,10 @@ namespace be_project_swp.Migrations
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
+
+                    b.Property<string>("ReasonRefuse")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");

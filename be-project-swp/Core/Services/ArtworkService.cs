@@ -3,6 +3,8 @@ using be_artwork_sharing_platform.Core.Dtos.Artwork;
 using be_artwork_sharing_platform.Core.Dtos.General;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
+using be_project_swp.Core.Dtos.Artwork;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
@@ -23,7 +25,7 @@ namespace be_artwork_sharing_platform.Core.Services
 
         public async Task<IEnumerable<ArtworkDto>> GetAll()
         {
-            var artworks = await _context.Artworks
+            var artworks = await _context.Artworks.Where(a => a.IsActive == true && a.IsDeleted == false)
                 .Select(a => new ArtworkDto
                 {
                     Id = a.Id,
@@ -42,18 +44,18 @@ namespace be_artwork_sharing_platform.Core.Services
             return artworks;
         }
 
-        public async Task<IEnumerable<Artwork>> SearchArtwork(string? search,string? searchBy, double? from, double? to, string? sortBy)
+        public async Task<IEnumerable<Artwork>> SearchArtwork(string? search, string? searchBy, double? from, double? to, string? sortBy)
         {
             var artworks = _context.Artworks.Include(a => a.Category).AsQueryable();
             #region Filter
-            if(searchBy is null)
+            if (searchBy is null)
             {
                 if (!string.IsNullOrEmpty(search))
                 {
                     artworks = artworks.Where(a => a.Name.Contains(search));
                 }
             }
-            if(searchBy is not null)
+            if (searchBy is not null)
             {
                 if (searchBy.Equals("category_name"))
                 {
@@ -97,10 +99,35 @@ namespace be_artwork_sharing_platform.Core.Services
             return artworks.ToList();
         }
 
-        public async Task<IEnumerable<ArtworkDto>> GetArtworkByUserId(string user_Id)
+        public async Task<IEnumerable<Artwork>> GetArtworkForAdmin(string? getBy)
+        {
+            var artworks = _context.Artworks.Include(a => a.Category).AsQueryable();
+            #region Filter 
+            if (getBy == null)
+                artworks = artworks.OrderByDescending(a => a.CreatedAt);
+            else
+            {
+                if (getBy.Equals("is_active_false"))
+                {
+                    artworks = artworks.Where(a => a.IsActive == false && a.IsDeleted == false);
+                }
+                else if (getBy.Equals("is_active_true"))
+                {
+                    artworks = artworks.Where(a => a.IsActive == true);
+                }
+                else if (getBy.Equals("is_delete_true"))
+                {
+                    artworks = artworks.Where(a => a.IsDeleted == true);
+                }
+            }
+            #endregion
+            return artworks.ToList();
+        }
+
+        public async Task<IEnumerable<GetArtworkByUserId>> GetArtworkByUserId(string user_Id)
         {
             var artworks = _context.Artworks.Where(a => a.User_Id == user_Id)
-                .Select(a => new ArtworkDto
+                .Select(a => new GetArtworkByUserId
                 {
                     Id = a.Id,
                     User_Id = a.User_Id,
@@ -114,8 +141,34 @@ namespace be_artwork_sharing_platform.Core.Services
                     UpdatedAt = a.UpdatedAt,
                     IsActive = a.IsActive,
                     IsDeleted = a.IsDeleted,
+                    ReasonRefuse = a.ReasonRefuse
+                    
                 }).ToList();
             return artworks;
+        }
+
+        public async Task AcceptArtwork(long id, AcceptArtwork acceptArtwork)
+        {
+            var accept = await _context.Artworks.FirstOrDefaultAsync(a => a.Id == id);
+            if(accept is not null)
+            {
+                accept.IsActive = acceptArtwork.IsActive;
+                accept.ReasonRefuse = "Processed by Admin";
+            }
+            _context.Update(accept);
+            _context.SaveChanges();
+        }
+
+        public async Task RefuseArtwork(long id, RefuseArtwork refuseArtwork)
+        {
+            var refuse = await _context.Artworks.FirstOrDefaultAsync(a => a.Id == id);
+            if(refuse is not null)
+            {
+                refuse.IsDeleted = true;
+                refuse.ReasonRefuse = refuseArtwork.Reason;
+            }
+            _context.Update(refuse);
+            _context.SaveChanges();
         }
 
         public async Task<Artwork> GetById(long id)
@@ -180,6 +233,7 @@ namespace be_artwork_sharing_platform.Core.Services
                 artwork.Description = updateArtwork.Description;
                 artwork.Url_Image = updateArtwork.Url_Image;
                 artwork.Price = updateArtwork.Price;
+                artwork.IsActive = false;
             }
             _context.Update(artwork);
             _context.SaveChanges();

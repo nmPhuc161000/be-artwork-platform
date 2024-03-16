@@ -1,8 +1,7 @@
-﻿namespace be_artwork_sharing_platform.Core.Constancs
+﻿namespace be_artwork_sharing_platform.Core.Constancs;
+public class StaticUserRole
 {
-    public class StaticUserRole
-    {
-        public const string ADMIN = "ADMIN";
-        public const string CREATOR = "CREATOR";
-    }
+    public const string ADMIN = "ADMIN";
+    public const string CREATOR = "CREATOR";
 }
+

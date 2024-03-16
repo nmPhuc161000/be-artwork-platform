@@ -27,7 +27,7 @@ namespace be_artwork_sharing_platform.Core.Services
             var requestDto = new RequestOrderDto()
             {
                 Id = request.Id,
-                FullName_Sender = request.UserName_Sender,
+                FullName_Sender = request.FullName_Sender,
                 FullName_Receivier = request.FullName_Receivier,
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,

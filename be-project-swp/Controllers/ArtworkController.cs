@@ -6,6 +6,9 @@ using be_artwork_sharing_platform.Core.Dtos.Category;
 using be_artwork_sharing_platform.Core.Dtos.General;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
+using be_artwork_sharing_platform.Core.Services;
+using be_project_swp.Core.Dtos.Artwork;
+using be_project_swp.Core.Dtos.RequestOrder;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -46,13 +49,24 @@ namespace be_artwork_sharing_platform.Controllers
 
         [HttpPost]
         [Route("search")]
-        public async Task<IActionResult> Search(string? search,string? searchBy, double? from, double? to, string? sortBy)
+        public async Task<IActionResult> Search(string? search, string? searchBy, double? from, double? to, string? sortBy)
         {
             var artworks = await _artworkService.SearchArtwork(search, searchBy, from, to, sortBy);
             if (artworks is null)
                 return NotFound("Artworks not available");
             return Ok(_mapper.Map<List<ArtworkDto>>(artworks));
         }
+
+        [HttpPost]
+        [Route("get-artwork-for-admin")]
+        public async Task<IActionResult> GetArtworkForAdmin(string? getBy)
+        {
+            var artworks = await _artworkService.GetArtworkForAdmin(getBy);
+            if (artworks is null)
+                return NotFound("Artworks not available");
+            return Ok(_mapper.Map<List<GetArtworkByUserId>>(artworks));
+        }
+
 
         [HttpGet]
         [Route("get-by-userId")]
@@ -65,6 +79,44 @@ namespace be_artwork_sharing_platform.Controllers
             if (artworks is null) return null;
             return Ok(artworks);
 
+        }
+
+        [HttpPatch]
+        [Route("accept-artwork")]
+/*        [Authorize(Roles = StaticUserRole.ADMIN)]*/
+        public async Task<IActionResult> AcceptArtwork(long id)
+        {
+            try
+            {
+                var accpetArtwork = new AcceptArtwork();
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                await _logService.SaveNewLog(userId, "Accept Artwork");
+                await _artworkService.AcceptArtwork(id, accpetArtwork);
+                return Ok("Accept Artwork Successfully");
+            }
+            catch
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpPatch]
+        [Route("refuse-artwork")]
+        public async Task<IActionResult> RefuseArtwork(long id, RefuseArtwork refuseArtwork)
+        {
+            try
+            {
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                await _logService.SaveNewLog(userId, "Refuse Artwork");
+                await _artworkService.RefuseArtwork(id, refuseArtwork);
+                return Ok("Refuse Artwork Successfully");
+            }
+            catch
+            {
+                return BadRequest("Something went wrong");
+            }
         }
 
         [HttpGet]
@@ -91,8 +143,6 @@ namespace be_artwork_sharing_platform.Controllers
                 return BadRequest("Somethong wrong");
             }
         }
-
-        
 
         [HttpPost]
         [Route("create")]
