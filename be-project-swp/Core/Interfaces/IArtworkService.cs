@@ -18,5 +18,7 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         Task UpdateArtwork(long id, UpdateArtwork updateArtwork);
         Task AcceptArtwork(long id, AcceptArtwork acceptArtwork);
         Task RefuseArtwork(long id, RefuseArtwork refuseArtwork);
+        bool GetStatusIsActiveArtwork(long id);
+        bool GetStatusIsDeleteArtwork(long id);
     }
 }

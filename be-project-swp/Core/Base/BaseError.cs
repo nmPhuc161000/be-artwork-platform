@@ -2,7 +2,7 @@
 {
     public class BaseError
     {
-        public string Code { get; set; } = string.Empty;
+        public int Code { get; set; }
         public string Message { get; set; } = string.Empty;
     }
 }

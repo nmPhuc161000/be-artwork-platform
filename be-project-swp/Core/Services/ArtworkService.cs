@@ -239,5 +239,17 @@ namespace be_artwork_sharing_platform.Core.Services
             _context.Update(artwork);
             _context.SaveChanges();
         }
+
+        public bool GetStatusIsActiveArtwork(long id)
+        {
+            var status = _context.Artworks.FirstOrDefault(b => b.Id == id);
+            return status.IsActive;
+        }
+
+        public bool GetStatusIsDeleteArtwork(long id)
+        {
+            var status = _context.Artworks.FirstOrDefault(b => b.Id == id);
+            return status.IsDeleted;
+        }
     }
 }
