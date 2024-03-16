@@ -47,6 +47,7 @@ namespace be_artwork_sharing_platform.Core.Services
         public async Task<IEnumerable<Artwork>> SearchArtwork(string? search, string? searchBy, double? from, double? to, string? sortBy)
         {
             var artworks = _context.Artworks.Include(a => a.Category).AsQueryable();
+            artworks = artworks.Where(a => a.IsActive == true && a.IsDeleted == false);
             #region Filter
             if (searchBy is null)
             {
@@ -113,11 +114,11 @@ namespace be_artwork_sharing_platform.Core.Services
                 }
                 else if (getBy.Equals("is_active_true"))
                 {
-                    artworks = artworks.Where(a => a.IsActive == true);
+                    artworks = artworks.Where(a => a.IsActive == true && a.IsDeleted == false);
                 }
                 else if (getBy.Equals("is_delete_true"))
                 {
-                    artworks = artworks.Where(a => a.IsDeleted == true);
+                    artworks = artworks.Where(a => a.IsDeleted == true && a.IsActive == false);
                 }
             }
             #endregion
