@@ -16,7 +16,7 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         Task CancelRequestByReceivier(long id, CancelRequest cancelRequest, string user_Id);
         Task UpdateStatusRequest(long id, string user_Id, UpdateStatusRequest updateStatusRequest);
         int DeleteRequestBySender(long id, string user_Name);
-        bool GetStatusRequestByUserNameRequest(long id, string userNames);
+        string GetStatusRequestByUserNameRequest(long id, string userNames);
         bool GetActiveRequestByUserNameRequest(long id, string userNames);
     }
 }

@@ -44,7 +44,7 @@ namespace be_artwork_sharing_platform.Core.Services
             }
             return null;
         }
-        public async Task AddToFavourite(string userId, long artworkId, long favourite_Id)
+        public async Task<long> AddToFavourite(string userId, long artworkId, long favourite_Id)
         {
             var favourite = new Favourite
             {
@@ -54,6 +54,7 @@ namespace be_artwork_sharing_platform.Core.Services
             };
             _context.Favorites.Add(favourite);
             _context.SaveChanges();
+            return favourite.Id;
         }
 
         public int RemoveArtwork(long favourite_Id, string user_Id)

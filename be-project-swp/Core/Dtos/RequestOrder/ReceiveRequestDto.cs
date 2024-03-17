@@ -10,6 +10,6 @@
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
-        public bool StatusRequest { get; set; }
+        public string StatusRequest { get; set; }
     }
 }

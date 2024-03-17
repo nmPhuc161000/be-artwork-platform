@@ -1,4 +1,4 @@
-﻿namespace be_project_swp.Core.Email
+﻿namespace be_project_swp.Core.Dtos.Email
 {
     public class SmtpSettings
     {

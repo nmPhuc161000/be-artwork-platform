@@ -1,4 +1,4 @@
-﻿namespace be_project_swp.Core.Dtos.Zalopays
+﻿namespace be_project_swp.Core.Dtos.Zalopays.Config
 {
     public class PaymentLinkDtos
     {

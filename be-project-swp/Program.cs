@@ -14,7 +14,6 @@ using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
-using be_project_swp.Core.Dtos.Zalopays;
 using be_project_swp.Core.Interfaces;
 using be_project_swp.Core.Services;
 using Catel.Services;
@@ -24,7 +23,7 @@ using System.Configuration;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using be_project_swp.Core.Email;
+using be_project_swp.Core.Dtos.Zalopays.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,16 +49,14 @@ builder.Services.AddScoped<IArtworkService, ArtworkService>();
 builder.Services.AddScoped<IFavouriteService, FavouriteService>();
 builder.Services.AddScoped<IRequestOrderService, RequestOrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-
-
 //Email
 
 
 //Zalo Pay
 builder.Services.Configure<ZaloPayConfig>(
     builder.Configuration.GetSection(ZaloPayConfig.ConfigName));
+
 
 //Add Identity
 builder.Services

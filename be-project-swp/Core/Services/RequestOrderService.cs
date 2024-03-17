@@ -118,15 +118,14 @@ namespace be_artwork_sharing_platform.Core.Services
         public async Task UpdateStatusRequest(long id, string user_Id, UpdateStatusRequest updateStatusRequest)
         {
             var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.UserId_Receivier == user_Id);
-            if(request is not null )
+            if (request is not null)
             {
-                request.StatusRequest = updateStatusRequest.StatusRequest;
-            }
+            } 
             _context.Update(request);
             _context.SaveChanges();
         }
 
-        public bool GetStatusRequestByUserNameRequest(long id, string userName)
+        public string GetStatusRequestByUserNameRequest(long id, string userName)
         {
             var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id && r.UserName_Sender == userName);
             return checkStatusRequest.StatusRequest;

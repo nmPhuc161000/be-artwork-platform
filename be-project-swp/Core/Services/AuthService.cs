@@ -62,8 +62,18 @@ namespace be_artwork_sharing_platform.Core.Services
 
         public async Task<GeneralServiceResponseDto> RegisterAsync(RegisterDto registerDto)
         {
+            var isExistNickName = await _userManager.FindByNameAsync(registerDto.NickName);
             var isExistUser = await _userManager.FindByNameAsync(registerDto.UserName);
             var isExistEmail = await _userManager.FindByEmailAsync(registerDto.Email);
+            if(isExistNickName is not null)
+            {
+                return new GeneralServiceResponseDto()
+                {
+                    IsSucceed = false,
+                    StatusCode = 400,
+                    Message = "NickName Already Exist"
+                };
+            }
             if (isExistUser is not null)
                 return new GeneralServiceResponseDto()
                 {
@@ -82,7 +92,7 @@ namespace be_artwork_sharing_platform.Core.Services
 
             ApplicationUser newUser = new ApplicationUser()
             {
-                FullName = registerDto.FullName,
+                NickName = registerDto.NickName,
                 UserName = registerDto.UserName,
                 Email = registerDto.Email,
                 PhoneNumber = registerDto.PhoneNo,
@@ -228,7 +238,7 @@ namespace be_artwork_sharing_platform.Core.Services
             {
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim("FullName", user.FullName)
+                new Claim("NickName", user.NickName)
             };
 
             foreach(var userRole in userRoles)
@@ -278,7 +288,7 @@ namespace be_artwork_sharing_platform.Core.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
             if (user is not null)
-                return user.FullName;
+                return user.NickName;
             return null;
         }
 
@@ -286,7 +296,7 @@ namespace be_artwork_sharing_platform.Core.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if(user is not null)
-                return user.FullName;
+                return user.NickName;
             return null;
         }
 
@@ -313,7 +323,7 @@ namespace be_artwork_sharing_platform.Core.Services
             return new UserInfoResult()
             {
                 Id = user.Id,
-                FullName = user.FullName,
+                NickName = user.NickName,
                 UserName = user.UserName,
                 Email = user.Email,
                 Address = user.Address,

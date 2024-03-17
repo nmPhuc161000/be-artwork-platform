@@ -38,7 +38,7 @@ namespace be_project_swp.Controllers
             _userService = userService;
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("get-artwork-for-admin")]
         [Authorize(Roles = StaticUserRole.ADMIN)]
         public async Task<IActionResult> GetArtworkForAdmin(string? getBy)

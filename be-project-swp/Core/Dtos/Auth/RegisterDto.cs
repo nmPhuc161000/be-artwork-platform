@@ -7,7 +7,7 @@ namespace be_artwork_sharing_platform.Core.Dtos.Auth
     {
         [Required]
         [StringLength(30)]
-        public string FullName { get; set; }
+        public string NickName { get; set; }
 
         [Required(ErrorMessage = "UserName is required")]
         public string UserName { get; set; }

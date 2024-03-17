@@ -184,9 +184,9 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                bool checkStatusRequest = _requestOrderService.GetStatusRequestByUserNameRequest(id, userName);
+                var checkStatusRequest = _requestOrderService.GetStatusRequestByUserNameRequest(id, userName);
                 bool checkActiveRequest = _requestOrderService.GetActiveRequestByUserNameRequest(id, userName);
-                if(checkStatusRequest || checkActiveRequest == false)
+                if(checkActiveRequest)
                 {
                     return BadRequest("Your request has been confirmed by the receiver or is in progress so do not delete this request!!!!!");
                 }
