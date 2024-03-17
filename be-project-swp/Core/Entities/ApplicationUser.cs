@@ -5,7 +5,7 @@ namespace be_artwork_sharing_platform.Core.Entities
 {
     public class ApplicationUser : IdentityUser
     {
-        public string FullName { get; set; }
+        public string NickName { get; set; }
         public string Address { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdateAt {  get; set; } = DateTime.Now;

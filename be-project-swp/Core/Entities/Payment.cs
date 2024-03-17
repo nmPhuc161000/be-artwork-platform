@@ -10,17 +10,16 @@ namespace be_project_swp.Core.Entities
         [Key]
         [Required]
         public string Id { get; set; }
-        public string PaymentContent { get; set; }
-        public string PaymentCurrency { get; set; }
-        public string PaymentRefId { get; set; }
-        public double RequiredAmount { get; set; }
-        public DateTime PaymentDate { get; set; }
-        public DateTime ExpireDate { get; set; }
-        public string PaymentLanguage { get; set; }
-        public string Signature { get; set; }
-        public string MerchantId { get; set; }
-        public string PaymentDestinationId { get; set; }
-        public string InsertUser { get; set; }
+        public string MerchantName { get; set; }
+        public string MerchantWebLink { get; set; }
+        public string MerchantIpnUrl { get; set; }
+        public string MerchantReturnIpnUrl { get; set; }
+        public string SecretKey { get; set; }
+        public bool IsActive { get; set; }
+        public string CreatedBy { get; set; }
+        public string LastUpdatedBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime LastUpdateAt { get; set; }
         public long Artwork_Id { get; set; }
         // RelationShip
         [ForeignKey("InsertUser")]

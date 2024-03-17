@@ -12,6 +12,6 @@ namespace be_artwork_sharing_platform.Core.Entities
         public string Text {  get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
-        public bool StatusRequest { get; set; } = false;
+        public string StatusRequest { get; set; }
     }
 }

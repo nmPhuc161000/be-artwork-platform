@@ -1,4 +1,9 @@
 ﻿namespace be_project_swp.Core.Dtos.RequestOrder;
+public enum StatusRequest
+{
+/*    1 = "Processing",*/
+
+}
 public class CancelRequest
 {
     public bool IsDelete { get; set; } = true;
@@ -11,5 +16,5 @@ public class UpdateRequest
 
 public class UpdateStatusRequest
 {
-    public bool StatusRequest { get; set; } = true;
+    public StatusRequest StatusRequest { get; set; } 
 }

@@ -151,7 +151,7 @@ namespace be_artwork_sharing_platform.Core.Services
         public async Task AcceptArtwork(long id, AcceptArtwork acceptArtwork)
         {
             var accept = await _context.Artworks.FirstOrDefaultAsync(a => a.Id == id);
-            if(accept is not null)
+            if (accept is not null)
             {
                 accept.IsActive = acceptArtwork.IsActive;
                 accept.ReasonRefuse = "Processed by Admin";

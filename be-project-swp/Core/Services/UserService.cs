@@ -25,7 +25,7 @@ namespace be_artwork_sharing_platform.Core.Services
             var user = _context.Users.FirstOrDefault(u => u.Id.Equals(userId));
             if (user is not null)
             {
-                user.FullName = updateUser.FullName;
+                user.NickName = updateUser.NickName;
                 user.Email = updateUser.Email;
                 user.Address = updateUser.Address;
                 user.PhoneNumber = updateUser.PhoneNo;
@@ -97,7 +97,7 @@ namespace be_artwork_sharing_platform.Core.Services
             return new UserInfoResult()
             {
                 Id = user.Id,
-                FullName = user.FullName,
+                NickName = user.NickName,
                 UserName = user.UserName,
                 Email = user.Email,
                 Address = user.Address,

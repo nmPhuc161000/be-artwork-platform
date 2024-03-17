@@ -1,14 +1,15 @@
-﻿using Catel;
+﻿using be_project_swp.Core.Dtos.Zalopays.Response;
+using Catel;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1.Ocsp;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace be_project_swp.Core.Dtos.Zalopays
+namespace be_project_swp.Core.Dtos.Zalopays.Request
 {
     public class CreateZalopayRequest
     {
-        public CreateZalopayRequest(int appId, string appUser, long appTime, double amount, string appTransId, string bankCode, string desciption)
+        public CreateZalopayRequest(string appId, string appUser, long appTime, double amount, string appTransId, string bankCode, string desciption)
         {
             AppId = appId;
             AppUser = appUser;
@@ -18,7 +19,7 @@ namespace be_project_swp.Core.Dtos.Zalopays
             BankCode = bankCode;
             Description = desciption;
         }
-        public int AppId { get; set; }
+        public string AppId { get; set; }
         public string AppUser { get; set; } = string.Empty;
         public long AppTime { get; set; }
         public double Amount { get; set; }
@@ -68,7 +69,7 @@ namespace be_project_swp.Core.Dtos.Zalopays
                 var responseContent = response.Content.ReadAsStringAsync().Result;
                 var responseData = JsonConvert
                     .DeserializeObject<CreateZalopayResponse>(responseContent);
-                if(responseData.returnCode == 1)
+                if (responseData.returnCode == 1)
                 {
                     return (true, responseData.orderUrl);
                 }
