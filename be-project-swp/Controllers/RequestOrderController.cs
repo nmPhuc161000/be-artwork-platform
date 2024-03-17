@@ -158,15 +158,14 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpPatch]
         [Route("update-status-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> UpdateStatusRequest(long id)
+        public async Task<IActionResult> UpdateStatusRequest(long id, UpdateStatusRequest updateStatusRequest)
         {
             try
             {
-                var updatelStatusRequest = new UpdateStatusRequest();
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
+                await _requestOrderService.UpdateStatusRequest(id, userId, updateStatusRequest);
                 await _logService.SaveNewLog(userId, "Update Status Request");
-                await _requestOrderService.UpdateStatusRequest(id, userId, updatelStatusRequest);
                 return Ok("Update Request Successfully");
             }
             catch

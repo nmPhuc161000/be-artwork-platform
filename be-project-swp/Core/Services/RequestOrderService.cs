@@ -1,5 +1,4 @@
 ﻿using be_artwork_sharing_platform.Core.DbContext;
-using be_artwork_sharing_platform.Core.Dtos.General;
 using be_artwork_sharing_platform.Core.Dtos.RequestOrder;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
@@ -69,7 +68,7 @@ namespace be_artwork_sharing_platform.Core.Services
                     CreatedAt = f.CreatedAt,
                     IsActive = f.IsActive,
                     IsDeleted = f.IsDeleted,
-                    StatusRequest = f.StatusRequest,
+                    StatusRequest = f.StatusRequest.ToString(),
                 }).ToList();
             return receivier;
         }
@@ -120,12 +119,13 @@ namespace be_artwork_sharing_platform.Core.Services
             var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.UserId_Receivier == user_Id);
             if (request is not null)
             {
-            } 
+                request.StatusRequest = updateStatusRequest.StatusRequest;
+            }
             _context.Update(request);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public string GetStatusRequestByUserNameRequest(long id, string userName)
+        public StatusRequest GetStatusRequestByUserNameRequest(long id, string userName)
         {
             var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id && r.UserName_Sender == userName);
             return checkStatusRequest.StatusRequest;

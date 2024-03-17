@@ -12,7 +12,7 @@ using be_artwork_sharing_platform.Core.DbContext;
 namespace be_project_swp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240317134217_init")]
+    [Migration("20240317161639_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -437,9 +437,8 @@ namespace be_project_swp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("StatusRequest")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("StatusRequest")
+                        .HasColumnType("int");
 
                     b.Property<string>("Text")
                         .IsRequired()
