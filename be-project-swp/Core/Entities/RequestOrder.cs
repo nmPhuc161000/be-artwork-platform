@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using be_project_swp.Core.Dtos.RequestOrder;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace be_artwork_sharing_platform.Core.Entities
 {
@@ -12,6 +13,6 @@ namespace be_artwork_sharing_platform.Core.Entities
         public string Text {  get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
-        public string StatusRequest { get; set; }
+        public StatusRequest StatusRequest { get; set; } = StatusRequest.Waiting;
     }
 }

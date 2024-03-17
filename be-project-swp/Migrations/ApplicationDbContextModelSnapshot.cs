@@ -434,9 +434,8 @@ namespace be_project_swp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("StatusRequest")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("StatusRequest")
+                        .HasColumnType("int");
 
                     b.Property<string>("Text")
                         .IsRequired()

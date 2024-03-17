@@ -1,4 +1,6 @@
-﻿namespace be_artwork_sharing_platform.Core.Dtos.RequestOrder
+﻿using be_project_swp.Core.Dtos.RequestOrder;
+
+namespace be_artwork_sharing_platform.Core.Dtos.RequestOrder
 {
     public class RequestOrderDto
     {
@@ -11,6 +13,6 @@
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
-        public string StatusRequest { get; set; }
+        public StatusRequest StatusRequest { get; set; }
     }
 }
