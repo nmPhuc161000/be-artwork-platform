@@ -26,8 +26,8 @@ namespace be_artwork_sharing_platform.Core.Services
             var requestDto = new RequestOrderDto()
             {
                 Id = request.Id,
-                FullName_Sender = request.FullName_Sender,
-                FullName_Receivier = request.FullName_Receivier,
+                NickName_Sender = request.NickName_Sender,
+                NickName_Receivier = request.NickName_Receivier,
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
                 Text = request.Text,
@@ -43,8 +43,8 @@ namespace be_artwork_sharing_platform.Core.Services
         {
             var request = new RequestOrder
             {
-                FullName_Sender = fullName_Sender,
-                FullName_Receivier = fullName_Receivier,
+                NickName_Sender = fullName_Sender,
+                NickName_Receivier = fullName_Receivier,
                 UserName_Sender = userName_Request,
                 UserId_Receivier = userId_Receivier,
                 Email = sendRequest.Email,
@@ -61,7 +61,7 @@ namespace be_artwork_sharing_platform.Core.Services
                 .Select(f => new ReceiveRequestDto
                 {
                     Id =f.Id,
-                    FullName_Sender = f.FullName_Sender,
+                    NickName_Sender = f.NickName_Sender,
                     Email_Sender = f.Email,
                     PhoneNo_Sender = f.PhoneNumber,
                     Text = f.Text,
@@ -79,8 +79,8 @@ namespace be_artwork_sharing_platform.Core.Services
                 .Select(f => new RequestOrderDto
                 {
                     Id = f.Id,
-                    FullName_Sender = f.FullName_Sender,
-                    FullName_Receivier = f.FullName_Receivier,
+                    NickName_Sender = f.NickName_Sender,
+                    NickName_Receivier = f.NickName_Receivier,
                     Email = f.Email,
                     PhoneNumber = f.PhoneNumber,
                     Text = f.Text,

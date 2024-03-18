@@ -3,7 +3,7 @@
     public class ReceiveRequestDto
     {
         public long Id { get; set; }
-        public string FullName_Sender { get; set; }
+        public string NickName_Sender { get; set; }
         public string Email_Sender { get; set; }
         public string PhoneNo_Sender { get; set; }
         public string Text { get; set; }
