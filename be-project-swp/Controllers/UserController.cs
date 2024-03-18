@@ -9,6 +9,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mail;
 using System.Net;
+using be_artwork_sharing_platform.Core.Dtos.Auth;
+using Microsoft.AspNetCore.Identity;
+using be_artwork_sharing_platform.Core.Entities;
+using be_artwork_sharing_platform.Core.DbContext;
 
 
 namespace be_artwork_sharing_platform.Controllers
@@ -21,13 +25,17 @@ namespace be_artwork_sharing_platform.Controllers
         private readonly ILogService _logService;
         private readonly IUserService _userService;
         private readonly IConfiguration _config;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _context;
 
-        public UserController(IAuthService authService, ILogService logService, IUserService userService, IConfiguration config)
+        public UserController(IAuthService authService, ILogService logService, IUserService userService, IConfiguration config, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
             _authService = authService;
             _logService = logService;
             _userService = userService;
             _config = config;
+            _userManager = userManager;
+            _context = context;
         }
 
         //Route -> List of all users with details
@@ -69,6 +77,11 @@ namespace be_artwork_sharing_platform.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateInformation(UpdateInformation updateUser)
         {
+            var isExistNickName = _context.Users.FirstOrDefault(u => u.NickName ==  updateUser.NickName);
+            if(isExistNickName != null)
+            {
+                return BadRequest("NickName Already Exist");
+            }
             string userName = HttpContext.User.Identity.Name;
             string userId = await _authService.GetCurrentUserId(userName);
             await _logService.SaveNewLog(userName, "Update Information User");

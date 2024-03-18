@@ -30,7 +30,7 @@ namespace be_artwork_sharing_platform.Core.Services
                 {
                     Id = a.Id,
                     User_Id = a.User_Id,
-                    Full_Name = a.Full_Name,
+                    Nick_Name = a.Nick_Name,
                     Category_Name = a.Category_Name,
                     Name = a.Name,
                     Description = a.Description,
@@ -65,10 +65,10 @@ namespace be_artwork_sharing_platform.Core.Services
                         artworks = artworks.Where(a => a.Category_Name.Contains(search));
                     }
                 }
-                else if (searchBy.Equals("user_name"))
+                else if (searchBy.Equals("nick_name"))
                     if (!string.IsNullOrEmpty(search))
                     {
-                        artworks = artworks.Where(a => a.Full_Name.Contains(search));
+                        artworks = artworks.Where(a => a.Nick_Name.Contains(search));
                     }
             }
             if (from.HasValue)
@@ -132,7 +132,7 @@ namespace be_artwork_sharing_platform.Core.Services
                 {
                     Id = a.Id,
                     User_Id = a.User_Id,
-                    Full_Name = a.Full_Name,
+                    Full_Name = a.Nick_Name,
                     Category_Name = a.Category_Name,
                     Name = a.Name,
                     Description = a.Description,
@@ -181,7 +181,7 @@ namespace be_artwork_sharing_platform.Core.Services
                 {
                     Id = artwork.Id,
                     User_Id = artwork.User_Id,
-                    Full_Name = artwork.Full_Name,
+                    Nick_Name = artwork.Nick_Name,
                     Category_Name = artwork.Category_Name,
                     Name = artwork.Name,
                     Description = artwork.Description,
@@ -205,7 +205,7 @@ namespace be_artwork_sharing_platform.Core.Services
             var artwork = new Artwork
             {
                 User_Id = user_Id,
-                Full_Name = user_Name,
+                Nick_Name = user_Name,
                 Category_Name = artworkDto.Category_Name,
                 Name = artworkDto.Name,
                 Description = artworkDto.Description,
@@ -235,6 +235,7 @@ namespace be_artwork_sharing_platform.Core.Services
                 artwork.Url_Image = updateArtwork.Url_Image;
                 artwork.Price = updateArtwork.Price;
                 artwork.IsActive = false;
+                artwork.ReasonRefuse = "Processing";
             }
             _context.Update(artwork);
             _context.SaveChanges();
