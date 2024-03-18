@@ -52,8 +52,8 @@ namespace be_artwork_sharing_platform.Core.Services
                 Artwork_Id = artworkId,
                 User_Id = userId,
             };
-            _context.Favorites.Add(favourite);
-            _context.SaveChanges();
+            await _context.Favorites.AddAsync(favourite);
+            await _context.SaveChangesAsync();
             return favourite.Id;
         }
 

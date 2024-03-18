@@ -65,14 +65,14 @@ namespace be_artwork_sharing_platform.Controllers
                     }
                     else
                     {
-                        _favouriteService.AddToFavourite(userId, artwork_Id, favouriteDto.Id);
+                        var id = await _favouriteService.AddToFavourite(userId, artwork_Id, favouriteDto.Id);
                         await _logService.SaveNewLog(userNameCurrent, "Add Artwork to your Favourite Successfully");
                         return Ok(new AddFavourite()
                         {
                             IsSucceed = true,
                             StatusCode = 200,
                             Message = "Add Artwork to your favourite successfully",
-                            Favourite_Id = favouriteDto.Id
+                            Favourite_Id = id
                         });
                     }
                 }
