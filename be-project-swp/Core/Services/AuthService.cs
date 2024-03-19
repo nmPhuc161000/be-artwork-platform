@@ -62,7 +62,7 @@ namespace be_artwork_sharing_platform.Core.Services
 
         public async Task<GeneralServiceResponseDto> RegisterAsync(RegisterDto registerDto)
         {
-            var isExistNickName = await _userManager.FindByNameAsync(registerDto.NickName);
+            var isExistNickName = _context.Users.FirstOrDefault(u => u.NickName == registerDto.NickName);
             var isExistUser = await _userManager.FindByNameAsync(registerDto.UserName);
             var isExistEmail = await _userManager.FindByEmailAsync(registerDto.Email);
             if(isExistNickName is not null)

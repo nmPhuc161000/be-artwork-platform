@@ -1,5 +1,7 @@
 ﻿using be_project_swp.Core.Dtos.RequestOrder;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography;
 
 namespace be_artwork_sharing_platform.Core.Entities
 {
