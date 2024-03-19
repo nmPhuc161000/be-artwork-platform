@@ -132,7 +132,7 @@ namespace be_artwork_sharing_platform.Core.Services
                 {
                     Id = a.Id,
                     User_Id = a.User_Id,
-                    Full_Name = a.Nick_Name,
+                    Nick_Name = a.Nick_Name,
                     Category_Name = a.Category_Name,
                     Name = a.Name,
                     Description = a.Description,
@@ -143,8 +143,9 @@ namespace be_artwork_sharing_platform.Core.Services
                     IsActive = a.IsActive,
                     IsDeleted = a.IsDeleted,
                     ReasonRefuse = a.ReasonRefuse
-                    
-                }).ToList();
+
+                }).ToList()
+                .OrderBy(a => a.CreatedAt);
             return artworks;
         }
 
