@@ -52,8 +52,8 @@ namespace be_project_swp.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FullName_Sender = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FullName_Receivier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NickName_Sender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NickName_Receivier = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserName_Sender = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserId_Receivier = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -143,7 +143,7 @@ namespace be_project_swp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Category_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Full_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Nick_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Url_Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: false),
@@ -257,6 +257,30 @@ namespace be_project_swp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Wallets",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Balance = table.Column<double>(type: "float", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Wallets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Wallets_users_User_Id",
+                        column: x => x.User_Id,
+                        principalTable: "users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "favourites",
                 columns: table => new
                 {
@@ -349,6 +373,11 @@ namespace be_project_swp.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Wallets_User_Id",
+                table: "Wallets",
+                column: "User_Id");
         }
 
         /// <inheritdoc />
@@ -377,6 +406,9 @@ namespace be_project_swp.Migrations
 
             migrationBuilder.DropTable(
                 name: "usertokens");
+
+            migrationBuilder.DropTable(
+                name: "Wallets");
 
             migrationBuilder.DropTable(
                 name: "artworks");

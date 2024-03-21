@@ -23,7 +23,6 @@ using System.Configuration;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using be_project_swp.Core.Dtos.Zalopays.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,12 +49,8 @@ builder.Services.AddScoped<IFavouriteService, FavouriteService>();
 builder.Services.AddScoped<IRequestOrderService, RequestOrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IWalletService, WalletService>();
 //Email
-
-
-//Zalo Pay
-builder.Services.Configure<ZaloPayConfig>(
-    builder.Configuration.GetSection(ZaloPayConfig.ConfigName));
 
 
 //Add Identity
@@ -134,7 +129,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ArtworkSharingPlatform v1"));
 }
 
 app.UseCors(c => c.SetIsOriginAllowed(isOriginAllowed => true)
