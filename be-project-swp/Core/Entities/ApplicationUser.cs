@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using be_project_swp.Core.Entities;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace be_artwork_sharing_platform.Core.Entities
@@ -17,6 +18,7 @@ namespace be_artwork_sharing_platform.Core.Entities
         //Relationship
         public List<Artwork> Artworks { get; set; }
         public List<Favourite> Favorites { get; set; }
+        public List<Wallet> Wallets { get; set; }
 
     }
 }

@@ -20,6 +20,7 @@ namespace be_artwork_sharing_platform.Core.DbContext
         public DbSet<ApplicationUser> Users {  get; set; }
         public DbSet<Favourite> Favorites { get; set; }
         public DbSet<RequestOrder> RequestOrders { get; set; }
+        public DbSet<Wallet> Wallets { get; set; }
 /*        public DbSet<Payment> Payments { get; set; }
         public DbSet<Order> Orders { get; set; }*/
 
@@ -82,6 +83,11 @@ namespace be_artwork_sharing_platform.Core.DbContext
                 .HasOne(f => f.Artworks)
                 .WithMany(f => f.Favourites)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Wallet>()
+                .HasOne(w => w.User)
+                .WithMany(w => w.Wallets)
+                .HasForeignKey(w => w.User_Id);
         }
     }
 }
