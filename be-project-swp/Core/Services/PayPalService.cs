@@ -1,155 +1,73 @@
-﻿/*using System.Net;
+﻿using System.Net;
 using PayPalCheckoutSdk.Orders;
 using be_project_swp.Core.Interfaces;
 using be_artwork_sharing_platform.Core.DbContext;
 using be_project_swp.Core.Dtos.PayPal;
 using PayPalCheckoutSdk.Core;
 using PayPalCheckoutSdk.Payments;
-using PayPal.Api;
-using Payer = PayPalCheckoutSdk.Orders.Payer;
-using Item = PayPal.Api.Item;
+using Microsoft.Extensions.Options;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 namespace be_project_swp.Core.Services
 {
     public class PayPalService : IPayPalService
     {
+        private readonly HttpClient _httpClient;
+        private readonly IOptions<PayPalSettings> _paypalSettings;
         private readonly IConfiguration _configuration;
-        private readonly ApplicationDbContext _context;
 
-        public PayPalService(ApplicationDbContext context, IConfiguration configuration)
+
+        public PayPalService(HttpClient httpClient, IOptions<PayPalSettings> paypalSettings, IConfiguration configuration)
         {
-            _context = context;
+            _httpClient = httpClient;
+            _paypalSettings = paypalSettings;
             _configuration = configuration;
         }
 
-        private const double ExchangeRate = 22_863.0;
-        public static double ConvertVndToDollar(double vnd)
+        public async Task<HttpResponseMessage> CreateOrder(string currency, decimal amount)
         {
-            var total = Math.Round(vnd / ExchangeRate, 2);
-            return total;
-        }
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.sandbox.paypal.com/v2/checkout/orders");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        public async Task<string> CreatePaymentUrl(PaymentInformationModel model, HttpContext context)
-        {
-            var envSandbox = new SandboxEnvironment(_configuration["Paypal:ClientId"], _configuration["Paypal:SecretKey"]);
-            var client = new PayPalHttpClient(envSandbox);
-            var paypalOrderId = DateTime.Now.Ticks;
-            var urlCallBack = _configuration["PaymentCallBack:ReturnUrl"];
-            var payment = new Payment()
+            var orderRequest = new
             {
-                intent = "sale",
-                transactions = new List<Transaction>()
+                intent = "CAPTURE",
+                purchase_units = new[]
+            {
+                new
                 {
-                    new Transaction()
+                    amount = new
                     {
-                        amount = new Amount()
-                        {
-                            total = ConvertVndToDollar(model.Amount).ToString(),
-                            currency = "USD",
-                            details = new AmountDetails
-                            {
-                                Tax = "0",
-                                Shipping = "0",
-                                Subtotal = ConvertVndToDollar(model.Amount).ToString(),
-                            }
-                        },
-                        item_list = new ItemList()
-                        {
-                            items = new List<Item>()
-                            {
-                                new Item()
-                                {
-                                    name = " | Order: " + model.OrderDescription,
-                                    currency = "USD",
-                                    price = ConvertVndToDollar(model.Amount).ToString(),
-                                    quantity = 1.ToString(),
-                                    sku = "sku",
-                                    tax = "0",
-                                    url = "https://www.code-mega.com" // Url detail of Item
-                                }
-                            }
-                        },
-                        description = $"Invoice #{model.OrderDescription}",
-                        invoice_number = paypalOrderId.ToString()
+                        currency_code = currency,
+                        value = amount.ToString("0.00")
                     }
-                },
-                redirect_urls = new RedirectUrls()
-                {
-                    return_url = $"{urlCallBack}?payment_method=PayPal&success=1&order_id={paypalOrderId}",
-                    cancel_url = $"{urlCallBack}?payment_method=PayPal&success=0&order_id={paypalOrderId}"
-                },
-                payer = new Payer()
-                {
-                    PaymentMethod = "paypal"
                 }
+            }
             };
 
-            var request = new PaymentCreatRequest();
-            request.RequestBody(payment);
+            request.Content = new StringContent(JsonSerializer.Serialize(orderRequest), Encoding.UTF8, "application/json");
 
-            var paymentUrl = "";
-            var response = await client.Execute(request);
-            var statusCode = response.StatusCode;
-
-            if (statusCode is not (HttpStatusCode.Accepted or HttpStatusCode.OK or HttpStatusCode.Created))
-                return paymentUrl;
-
-            var result = response.Result<Payment>();
-            using var links = result.Links.GetEnumerator();
-
-            while (links.MoveNext())
-            {
-                var lnk = links.Current;
-                if (lnk == null) continue;
-                if (!lnk.Rel.ToLower().Trim().Equals("approval_url")) continue;
-                paymentUrl = lnk.Href;
-            }
-            return paymentUrl;
+            return await _httpClient.SendAsync(request);
         }
 
-        public PaymentResponseModel PaymentExecute(IQueryCollection collections)
+        private async Task<string> GetAccessToken()
         {
-            var response = new PaymentResponseModel();
+            var client = new HttpClient();
+            var byteArray = Encoding.UTF8.GetBytes($"{_configuration["Paypal:ClientId"]}:{_configuration["Paypal:ClientSecret"]}");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 
-            foreach (var (key, value) in collections)
+            var form = new Dictionary<string, string>
             {
-                if (!string.IsNullOrEmpty(key) && key.ToLower().Equals("order_description"))
-                {
-                    response.OrderDescription = value;
-                }
+                ["grant_type"] = "client_credentials"
+            };
 
-                if (!string.IsNullOrEmpty(key) && key.ToLower().Equals("transaction_id"))
-                {
-                    response.TransactionId = value;
-                }
+            var response = await client.PostAsync("https://api.sandbox.paypal.com/v1/oauth2/token", new FormUrlEncodedContent(form));
+            var token = JsonSerializer.Deserialize<Dictionary<string, string>>(await response.Content.ReadAsStringAsync())["access_token"];
 
-                if (!string.IsNullOrEmpty(key) && key.ToLower().Equals("order_id"))
-                {
-                    response.OrderId = value;
-                }
-
-                if (!string.IsNullOrEmpty(key) && key.ToLower().Equals("payment_method"))
-                {
-                    response.PaymentMethod = value;
-                }
-
-                if (!string.IsNullOrEmpty(key) && key.ToLower().Equals("success"))
-                {
-                    response.Success = Convert.ToInt32(value) > 0;
-                }
-
-                if (!string.IsNullOrEmpty(key) && key.ToLower().Equals("paymentid"))
-                {
-                    response.PaymentId = value;
-                }
-
-                if (!string.IsNullOrEmpty(key) && key.ToLower().Equals("payerid"))
-                {
-                    response.PayerId = value;
-                }
-            }
-            return response;
+            return token;
         }
-    }   
+    }
 }
-*/

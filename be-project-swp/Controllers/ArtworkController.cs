@@ -95,6 +95,14 @@ namespace be_artwork_sharing_platform.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("get-by-nickName")]
+        public async Task<IActionResult> GetByNickName(string nick_Name)
+        {
+            var artworks = await _artworkService.GetByNickName(nick_Name);
+            return Ok(artworks);
+        }
+
         [HttpPost]
         [Route("create")]
         [Authorize(Roles = StaticUserRole.CREATOR)]

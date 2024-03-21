@@ -4,7 +4,6 @@ namespace be_project_swp.Core.Interfaces
 {
     public interface IPayPalService
     {
-        Task<string> CreatePaymentUrl(PaymentInformationModel model, HttpContext context);
-        PaymentResponseModel PaymentExecute(IQueryCollection collections);
+        Task<HttpResponseMessage> CreateOrder(string currency, decimal amount);
     }
 }

@@ -4,7 +4,7 @@ namespace be_project_swp.Core.Services
 {
     public class WalletService : IWalletService
     {
-        public Task Deposit()
+        public async Task Deposit()
         {
             throw new NotImplementedException();
         }

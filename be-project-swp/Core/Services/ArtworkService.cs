@@ -201,6 +201,27 @@ namespace be_artwork_sharing_platform.Core.Services
             }
         }
 
+        public async Task<IEnumerable<ArtworkDto>> GetByNickName(string nickName)
+        {
+            var artworks = await _context.Artworks.Where(a => a.Nick_Name == nickName && a.IsActive == true && a.IsDeleted == false)
+                .Select(a => new ArtworkDto
+                {
+                    Id = a.Id,
+                    User_Id = a.User_Id,
+                    Nick_Name = a.Nick_Name,
+                    Category_Name = a.Category_Name,
+                    Name = a.Name,
+                    Description = a.Description,
+                    Url_Image = a.Url_Image,
+                    Price = a.Price,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                    IsActive = a.IsActive,
+                    IsDeleted = a.IsDeleted,
+                }).ToListAsync();
+            return artworks;
+        }
+
         public async Task CreateArtwork(CreateArtwork artworkDto, string user_Id, string user_Name)
         {
             var artwork = new Artwork
