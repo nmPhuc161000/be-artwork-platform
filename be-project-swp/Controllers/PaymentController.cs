@@ -1,6 +1,7 @@
-﻿/*using be_project_swp.Core.Dtos.PayPal;
+﻿using be_project_swp.Core.Dtos.PayPal;
 using be_project_swp.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 
 namespace be_project_swp.Controllers
@@ -18,21 +19,18 @@ namespace be_project_swp.Controllers
 
         [HttpPost]
         [Route("create-payment")]
-        public async Task<IActionResult> CreatePaymentUrl(PaymentInformationModel model)
+        public async Task<IActionResult> CreateOrder(string currency, decimal amount)
         {
-            var url = await _payPalService.CreatePaymentUrl(model, HttpContext);
+            var response = await _payPalService.CreateOrder(currency, amount);
 
-            return Redirect(url);
-        }
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var orderId = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonResponse)["id"];
+                return Ok(new { OrderId = orderId });
+            }
 
-        [HttpPost]
-        [Route("callback-payment")]
-        public IActionResult PaymentCallback()
-        {
-            var response = _payPalService.PaymentExecute(Request.Query);
-
-            return Json(response);
+            return BadRequest();
         }
     }
 }
-*/

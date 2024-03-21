@@ -23,6 +23,8 @@ using System.Configuration;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using be_project_swp.Core.Dtos.PayPal;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,8 +52,15 @@ builder.Services.AddScoped<IRequestOrderService, RequestOrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
-//Email
+builder.Services.AddScoped<IPayPalService, PayPalService>();
 
+//Paypal
+/*builder.Services.AddSingleton<IPayPalService>();*/
+builder.Services.AddHttpClient("PayPalClient", client =>
+{
+    // C?u hình HttpClient t?i ?ây n?u c?n thi?t
+    client.BaseAddress = new Uri("https://api.paypal.com/");
+});
 
 //Add Identity
 builder.Services
