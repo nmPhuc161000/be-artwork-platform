@@ -1,8 +1,15 @@
 ﻿ using be_artwork_sharing_platform.Core.Dtos.Auth;
 using be_artwork_sharing_platform.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Mail;
-using System.Net;
+using be_artwork_sharing_platform.Core.Entities;
+using Microsoft.AspNetCore.Identity;
+using be_project_swp.Core.Dtos.General;
+using be_project_swp.Core.Dtos.Email;
+using be_project_swp.Core.Interfaces;
+using System.ComponentModel.DataAnnotations;
+using be_project_swp.Core.Dtos.Auth;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Cryptography;
 
 namespace be_artwork_sharing_platform.Controllers
 {
@@ -11,10 +18,14 @@ namespace be_artwork_sharing_platform.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailSender _emailSender;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
         {
             _authService = authService;
+            _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         [HttpPost]
@@ -83,5 +94,100 @@ namespace be_artwork_sharing_platform.Controllers
                 return Unauthorized("InvalidToken");
             }
         }
+
+        [HttpGet]
+        [Route("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string token, string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if(user != null)
+            {
+                var result = await _userManager.ConfirmEmailAsync(user, token);
+                if(result.Succeeded)
+                {
+                    return StatusCode(StatusCodes.Status200OK,
+                        new Response { Status = "Success", Message = "Email Verified successfully" });
+                }
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                        new Response { Status = "Error", Message = "This user does not exist" });
+        }
+
+        [HttpPost]
+        [Route("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([Required] string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var link = Url.Action(nameof(ResetPassword), "Authorization", new { token, email = user.Email }, Request.Scheme);
+                var message = new Message(new string[] { user.Email! }, "Forgot Password Link", link!);
+                _emailSender.SendEmail(message);
+                return StatusCode(StatusCodes.Status200OK,
+                    new Response { Status = "Success", Message = $"Password change request is sent on Email {user.Email} Successfully. Please Open your email & click the link" });
+            }
+            return StatusCode(StatusCodes.Status200OK,
+                    new Response { Status = "Error", Message = $"Could not send link to email, please try again." });
+        }
+
+        [HttpGet]
+        [Route("reset-password")]
+        public async Task<IActionResult> ResetPassword(string token, string email)
+        {
+            var model = new ResetPassword { Token = token, Email = email };
+            return Ok(new
+            {
+                model
+            });
+        }
+
+        [HttpPost]
+        [Route("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPassword resetPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(resetPassword.Email);
+            if (user != null)
+            {
+                var resetPasswordResult = await _userManager.ResetPasswordAsync(user, resetPassword.Token, resetPassword.Password);
+                if (!resetPasswordResult.Succeeded)
+                {
+                    foreach (var error in resetPasswordResult.Errors)
+                    {
+                        ModelState.AddModelError(error.Code, error.Description);
+                    }
+                    return Ok(ModelState);
+                }
+                return StatusCode(StatusCodes.Status200OK,
+                    new Response { Status = "Success", Message = $"Password has been changed" });
+            }
+            return StatusCode(StatusCodes.Status200OK,
+                    new Response { Status = "Error", Message = $"Could not send link to email, please try again." });
+        }
+
+        [HttpGet]
+        [Route("test-email")]
+        public IActionResult TestEmail()
+        {
+            var message = new Message(new string[]
+            { "ungcamtuankiet20020713@gmail.com" }, "Test", "<h1>Subcribe to mine chanel");
+            _emailSender.SendEmail(message);
+            return StatusCode(StatusCodes.Status200OK,
+                        new Response { Status = "Success", Message = "Email Verified successfully" });
+        }
+
+        /*        [HttpPost]
+                [Route("send-password-reset-code")]
+                public async Task<IActionResult> SendPasswordResetCode(string email)
+                {
+                    if (string.IsNullOrEmpty(email))
+                    {
+                        return BadRequest("Email should not be empty");
+                    }
+                    var user = await _userManager.FindByEmailAsync(email);
+
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    int otp = RandomNumberGenerator.
+                }*/
     }
 }

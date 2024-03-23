@@ -2,7 +2,6 @@
 using be_artwork_sharing_platform.Core.Dtos.General;
 using be_artwork_sharing_platform.Core.Dtos.User;
 using be_artwork_sharing_platform.Core.Interfaces;
-using be_project_swp.Core.Dtos.User;
 using be_project_swp.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +12,10 @@ using be_artwork_sharing_platform.Core.Dtos.Auth;
 using Microsoft.AspNetCore.Identity;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.DbContext;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using be_project_swp.Core.Dtos.Email;
+using System.ComponentModel.DataAnnotations;
+using be_project_swp.Core.Dtos.General;
 
 
 namespace be_artwork_sharing_platform.Controllers
@@ -27,8 +30,9 @@ namespace be_artwork_sharing_platform.Controllers
         private readonly IConfiguration _config;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
+        private readonly IEmailSender _emailSender;
 
-        public UserController(IAuthService authService, ILogService logService, IUserService userService, IConfiguration config, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public UserController(IAuthService authService, ILogService logService, IUserService userService, IConfiguration config, UserManager<ApplicationUser> userManager, ApplicationDbContext context, IEmailSender emailSender)
         {
             _authService = authService;
             _logService = logService;
@@ -36,6 +40,7 @@ namespace be_artwork_sharing_platform.Controllers
             _config = config;
             _userManager = userManager;
             _context = context;
+            _emailSender = emailSender;
         }
 
         //Route -> List of all users with details

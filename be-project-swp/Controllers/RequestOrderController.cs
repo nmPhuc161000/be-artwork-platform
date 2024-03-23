@@ -50,7 +50,7 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                string fullNameResquest = await _authService.GetCurrentFullName(userName);
+                string fullNameResquest = await _authService.GetCurrentNickName(userName);
                 string currentUserNameRequest = await _authService.GetCurrentUserName(userName);
                 string fullNameReceivier = await _authService.GetCurrentFullNameByUserId(user_Id);
                 if(userId == user_Id)

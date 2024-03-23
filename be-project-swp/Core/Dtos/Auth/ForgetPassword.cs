@@ -9,14 +9,15 @@ public class ForgetPassword
     public string Email { get; set; }
 }
 
-public class ResetPasswordModel
+public class ResetPassword
 {
     [Required]
-    [DataType(DataType.Password)]
-    public string Password { get; set; }
+    [StringLength(20, ErrorMessage = "Password must be at least 8 characters and maximum 20 characters", MinimumLength = 8)]
+    [RegularExpression(RegexConst.PASSWORD, ErrorMessage = "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character")]
+    public string Password { get; set; } = null!;
     [DataType(DataType.Password)]
     [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-    public string ConfirmPassword { get; set; }
-    public string Email { get; set; }
-    public string Token { get; set; }
+    public string ConfirmPassword { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string Token { get; set; } = null!;
 }

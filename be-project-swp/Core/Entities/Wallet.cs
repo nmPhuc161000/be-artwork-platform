@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace be_project_swp.Core.Entities
 {
+    [Table("wallets")]
     public class Wallet : BaseEntity<long>
     {
         public string User_Id { get; set; }
