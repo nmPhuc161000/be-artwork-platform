@@ -1,20 +1,10 @@
 ﻿using AutoMapper;
 using be_artwork_sharing_platform.Core.Constancs;
-using be_artwork_sharing_platform.Core.DbContext;
 using be_artwork_sharing_platform.Core.Dtos.Artwork;
-using be_artwork_sharing_platform.Core.Dtos.Category;
 using be_artwork_sharing_platform.Core.Dtos.General;
-using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
-using be_artwork_sharing_platform.Core.Services;
-using be_project_swp.Core.Dtos.Artwork;
-using be_project_swp.Core.Dtos.RequestOrder;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.CodeAnalysis;
-using System.Net.WebSockets;
 
 namespace be_artwork_sharing_platform.Controllers
 {
@@ -112,7 +102,7 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                string userFullNameCurrent = await _authService.GetCurrentFullName(userName);
+                string userFullNameCurrent = await _authService.GetCurrentNickName(userName);
                 await _artworkService.CreateArtwork(artworkDto, userId, userFullNameCurrent);
                 await _logService.SaveNewLog(userName, "Create New Artwork");
                 return Ok(new GeneralServiceResponseDto()

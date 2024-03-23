@@ -16,6 +16,8 @@ using System.Security.Claims;
 using System.Text;
 using be_project_swp.Core.Entities;
 using be_project_swp.Core.Base;
+using be_project_swp.Core.Dtos.Email;
+using PayPalCheckoutSdk.Orders;
 
 namespace be_artwork_sharing_platform.Core.Services
 {
@@ -124,9 +126,10 @@ namespace be_artwork_sharing_platform.Core.Services
             {
                 IsSucceed = true,
                 StatusCode = 200,
-                Message = "Create New User Successfully"
+                Message = $"Create New User & Email sent to {newUser.Email} Successfully"
             };
         }
+
 
         public async Task<LoginServiceResponceDto?> LoginAsync(LoginDto loginDto)
         {
@@ -284,7 +287,7 @@ namespace be_artwork_sharing_platform.Core.Services
             return null;
         }
 
-        public async Task<string> GetCurrentFullName(string username)
+        public async Task<string> GetCurrentNickName(string username)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
             if (user is not null)

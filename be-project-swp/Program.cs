@@ -5,26 +5,13 @@ using be_artwork_sharing_platform.Core.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
 using System.Text;
 using System.Text.Json.Serialization;
-using System.Collections.Generic;
-using System.Net.Mail;
-using Microsoft.Extensions.Configuration;
 using be_project_swp.Core.Interfaces;
 using be_project_swp.Core.Services;
-using Catel.Services;
-using be_project_swp.Core.Dtos.Auth;
-using be_project_swp.Core.Dtos;
-using System.Configuration;
-using System.Net;
-using System.Net.Mail;
-using System.Threading.Tasks;
-using be_project_swp.Core.Dtos.PayPal;
-using Microsoft.Extensions.DependencyInjection;
+using be_project_swp.Core.Dtos.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +23,7 @@ builder.Services
     });
 
 //DB
+var configuration = builder.Configuration;
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     var connection = builder.Configuration.GetConnectionString("local");
@@ -53,6 +41,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IPayPalService, PayPalService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 //Paypal
 /*builder.Services.AddSingleton<IPayPalService>();*/
@@ -61,6 +50,18 @@ builder.Services.AddHttpClient("PayPalClient", client =>
     // C?u hình HttpClient t?i ?ây n?u c?n thi?t
     client.BaseAddress = new Uri("https://api.paypal.com/");
 });
+
+//Config Required Email
+builder.Services.Configure<DataProtectionTokenProviderOptions>(otps => otps.TokenLifespan = TimeSpan.FromHours(10));
+builder.Services.Configure<IdentityOptions>(otps =>
+{
+    otps.SignIn.RequireConfirmedAccount = true;
+});
+
+//Gmail
+var emailConfig = configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+builder.Services.AddSingleton(emailConfig);
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 //Add Identity
 builder.Services

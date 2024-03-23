@@ -21,6 +21,7 @@ namespace be_artwork_sharing_platform.Core.DbContext
         public DbSet<Favourite> Favorites { get; set; }
         public DbSet<RequestOrder> RequestOrders { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<Report> Reports { get; set; }
 /*        public DbSet<Payment> Payments { get; set; }
         public DbSet<Order> Orders { get; set; }*/
 
