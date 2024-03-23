@@ -47,6 +47,27 @@ namespace be_project_swp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Reports",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    User_Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NickName_Reporter = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NickName_Accused = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    Reason_Delete = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reports", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "requestorders",
                 columns: table => new
                 {
@@ -172,6 +193,29 @@ namespace be_project_swp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "resetpasswords",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    OTP = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    InsertDateTimeUTC = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_resetpasswords", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_resetpasswords_users_User_Id",
+                        column: x => x.User_Id,
+                        principalTable: "users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "userclaims",
                 columns: table => new
                 {
@@ -257,7 +301,7 @@ namespace be_project_swp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Wallets",
+                name: "wallets",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
@@ -271,9 +315,9 @@ namespace be_project_swp.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Wallets", x => x.Id);
+                    table.PrimaryKey("PK_wallets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Wallets_users_User_Id",
+                        name: "FK_wallets_users_User_Id",
                         column: x => x.User_Id,
                         principalTable: "users",
                         principalColumn: "Id",
@@ -329,6 +373,11 @@ namespace be_project_swp.Migrations
                 column: "User_Id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_resetpasswords_User_Id",
+                table: "resetpasswords",
+                column: "User_Id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_roleclaims_RoleId",
                 table: "roleclaims",
                 column: "RoleId");
@@ -375,8 +424,8 @@ namespace be_project_swp.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Wallets_User_Id",
-                table: "Wallets",
+                name: "IX_wallets_User_Id",
+                table: "wallets",
                 column: "User_Id");
         }
 
@@ -390,7 +439,13 @@ namespace be_project_swp.Migrations
                 name: "logs");
 
             migrationBuilder.DropTable(
+                name: "Reports");
+
+            migrationBuilder.DropTable(
                 name: "requestorders");
+
+            migrationBuilder.DropTable(
+                name: "resetpasswords");
 
             migrationBuilder.DropTable(
                 name: "roleclaims");
@@ -408,7 +463,7 @@ namespace be_project_swp.Migrations
                 name: "usertokens");
 
             migrationBuilder.DropTable(
-                name: "Wallets");
+                name: "wallets");
 
             migrationBuilder.DropTable(
                 name: "artworks");
