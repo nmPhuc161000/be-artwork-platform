@@ -3,13 +3,17 @@ using be_artwork_sharing_platform.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using be_artwork_sharing_platform.Core.Entities;
 using Microsoft.AspNetCore.Identity;
-using be_project_swp.Core.Dtos.General;
-using be_project_swp.Core.Dtos.Email;
 using be_project_swp.Core.Interfaces;
-using System.ComponentModel.DataAnnotations;
 using be_project_swp.Core.Dtos.Auth;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Cryptography;
+using RandomNumberGenerator = be_project_swp.Core.Constancs.RandomNumberGenerator;
+using be_project_swp.Core.Entities;
+using be_artwork_sharing_platform.Core.DbContext;
+using ResetPassword = be_project_swp.Core.Entities.ResetPassword;
+using Microsoft.EntityFrameworkCore;
+using NETCore.MailKit.Core;
+using be_project_swp.Core.Services;
+using be_project_swp.Core.Dtos.General;
+using Microsoft.IdentityModel.Tokens;
 
 namespace be_artwork_sharing_platform.Controllers
 {
@@ -20,12 +24,14 @@ namespace be_artwork_sharing_platform.Controllers
         private readonly IAuthService _authService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly ApplicationDbContext _context;
 
-        public AuthController(IAuthService authService, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        public AuthController(IAuthService authService, UserManager<ApplicationUser> userManager, IEmailSender emailSender, ApplicationDbContext context)
         {
             _authService = authService;
             _userManager = userManager;
             _emailSender = emailSender;
+            _context = context;
         }
 
         [HttpPost]
@@ -113,7 +119,7 @@ namespace be_artwork_sharing_platform.Controllers
                         new Response { Status = "Error", Message = "This user does not exist" });
         }
 
-        [HttpPost]
+        /*[HttpPost]
         [Route("forgot-password")]
         public async Task<IActionResult> ForgotPassword([Required] string email)
         {
@@ -174,20 +180,60 @@ namespace be_artwork_sharing_platform.Controllers
             _emailSender.SendEmail(message);
             return StatusCode(StatusCodes.Status200OK,
                         new Response { Status = "Success", Message = "Email Verified successfully" });
+        }*/
+
+        [HttpPost]
+        [Route("send-password-reset-code")]
+        public async Task<IActionResult> SendPasswordResetCode(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Email should not be empty");
+            }
+            var user = await _userManager.FindByEmailAsync(email);
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            int otp = RandomNumberGenerator.Generate(100000, 999999);
+
+            var resetPassword = new ResetPassword()
+            {
+                Email = email,
+                OTP = otp.ToString(),
+                Token = token,
+                User_Id = user.Id,
+                InsertDateTimeUTC = DateTime.UtcNow
+            };
+            await _context.ResetPasswords.AddAsync(resetPassword);
+            await _context.SaveChangesAsync();
+
+            await be_project_swp.Core.Services.EmailService.SendEmailAsync(email, "Reset Password OTP", "Hello " + email + "<br><br>Please find the reset password token bellow<br><br><b>" + otp + "<b><br><br>Thanks<br>oktest.com");
+            return Ok("Token sent successfully in email");
         }
 
-        /*        [HttpPost]
-                [Route("send-password-reset-code")]
-                public async Task<IActionResult> SendPasswordResetCode(string email)
-                {
-                    if (string.IsNullOrEmpty(email))
-                    {
-                        return BadRequest("Email should not be empty");
-                    }
-                    var user = await _userManager.FindByEmailAsync(email);
-
-                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    int otp = RandomNumberGenerator.
-                }*/
+        [HttpPost]
+        [Route("reset-password")]
+        public async Task<IActionResult> ResetPassword(string email, string otp, ResetPasswordModel resetPasswordModel)
+        {
+            if(string.IsNullOrEmpty(email) || string.IsNullOrEmpty(resetPasswordModel.Password))
+            {
+                return BadRequest("Email $ New Password should not be empty");
+            }
+            var user = await _userManager.FindByEmailAsync(email);
+            var resetPassworDetail = await _context.ResetPasswords
+                .Where(rp => rp.OTP == otp && rp.User_Id == user.Id)
+                .OrderByDescending(rp => rp.InsertDateTimeUTC)
+                .FirstOrDefaultAsync();
+            var expirationDateTimeUtc = resetPassworDetail.InsertDateTimeUTC.AddMinutes(15);
+            if(expirationDateTimeUtc < DateTime.UtcNow)
+            {
+                return BadRequest("OTP is expired, please generate the new OTP");
+            }
+            var res = await _userManager.ResetPasswordAsync(user, resetPassworDetail.Token, resetPasswordModel.Password);
+            if(!res.Succeeded)
+            {
+                return BadRequest();
+            }
+            return Ok();
+        }
     }
 }

@@ -22,6 +22,7 @@ namespace be_artwork_sharing_platform.Core.DbContext
         public DbSet<RequestOrder> RequestOrders { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<Report> Reports { get; set; }
+        public DbSet<ResetPassword> ResetPasswords { get; set; }
 /*        public DbSet<Payment> Payments { get; set; }
         public DbSet<Order> Orders { get; set; }*/
 

@@ -9,7 +9,7 @@ public class ForgetPassword
     public string Email { get; set; }
 }
 
-public class ResetPassword
+public class ResetPasswordModel
 {
     [Required]
     [StringLength(20, ErrorMessage = "Password must be at least 8 characters and maximum 20 characters", MinimumLength = 8)]
@@ -18,6 +18,4 @@ public class ResetPassword
     [DataType(DataType.Password)]
     [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
     public string ConfirmPassword { get; set; } = null!;
-    public string Email { get; set; } = null!;
-    public string Token { get; set; } = null!;
 }

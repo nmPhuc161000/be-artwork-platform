@@ -2,6 +2,9 @@
 using be_project_swp.Core.Interfaces;
 using MailKit.Net.Smtp;
 using MimeKit;
+using System.Net.Mail;
+using System.Net;
+using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace be_project_swp.Core.Services
 {
@@ -53,6 +56,5 @@ namespace be_project_swp.Core.Services
                 }
             }
         }
-
     }
 }
