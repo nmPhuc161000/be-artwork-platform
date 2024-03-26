@@ -15,17 +15,12 @@ namespace be_project_swp.Migrations
                 name: "categories",
                 columns: table => new
                 {
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_categories", x => x.Id);
+                    table.PrimaryKey("PK_categories", x => x.Name);
                 });
 
             migrationBuilder.CreateTable(
@@ -47,7 +42,7 @@ namespace be_project_swp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Reports",
+                name: "reports",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
@@ -64,7 +59,7 @@ namespace be_project_swp.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Reports", x => x.Id);
+                    table.PrimaryKey("PK_reports", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -163,12 +158,11 @@ namespace be_project_swp.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Category_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category_Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Nick_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Url_Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: false),
-                    Category_Id = table.Column<long>(type: "bigint", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -180,10 +174,11 @@ namespace be_project_swp.Migrations
                 {
                     table.PrimaryKey("PK_artworks", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_artworks_categories_Category_Id",
-                        column: x => x.Category_Id,
+                        name: "FK_artworks_categories_Category_Name",
+                        column: x => x.Category_Name,
                         principalTable: "categories",
-                        principalColumn: "Id");
+                        principalColumn: "Name",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_artworks_users_User_Id",
                         column: x => x.User_Id,
@@ -308,6 +303,7 @@ namespace be_project_swp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Balance = table.Column<double>(type: "float", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -353,9 +349,9 @@ namespace be_project_swp.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_artworks_Category_Id",
+                name: "IX_artworks_Category_Name",
                 table: "artworks",
-                column: "Category_Id");
+                column: "Category_Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_artworks_User_Id",
@@ -439,7 +435,7 @@ namespace be_project_swp.Migrations
                 name: "logs");
 
             migrationBuilder.DropTable(
-                name: "Reports");
+                name: "reports");
 
             migrationBuilder.DropTable(
                 name: "requestorders");

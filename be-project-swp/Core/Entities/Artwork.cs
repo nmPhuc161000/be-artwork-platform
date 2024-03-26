@@ -12,8 +12,7 @@ namespace be_artwork_sharing_platform.Core.Entities
         public string Nick_Name { get; set; }
         public string Description { get; set; }
         public string Url_Image { get; set; }
-        public double Price { get; set; }
-        public long? Category_Id { get; set; }
+        public double Price { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public bool IsActive { get; set; } = false;
@@ -23,7 +22,7 @@ namespace be_artwork_sharing_platform.Core.Entities
         //Relationship
         public string User_Id { get; set; }
         public ApplicationUser User { get; set; }
-        [ForeignKey("Category_Id")]
+        [ForeignKey("Category_Name")]
         public Category Category { get; set; }
         public List<Favourite> Favourites { get; set; }
     }

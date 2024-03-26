@@ -1,6 +1,7 @@
 ﻿using NETCore.MailKit.Core;
 using System.Net.Mail;
 using System.Net;
+using be_project_swp.Core.Dtos.Email;
 
 namespace be_project_swp.Core.Services
 {
@@ -8,8 +9,8 @@ namespace be_project_swp.Core.Services
     {
         public static async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            string fromMail = "kietuctse161952@fpt.edu.vn";
-            string fromPassword = "tuxh vzux xtqa bzjs";
+            string fromMail = "artworksharingplatformswp391@gmail.com";
+            string fromPassword = "grgi crui lfis nulc";
 
             MailMessage message = new MailMessage();
             message.From = new MailAddress(fromMail);

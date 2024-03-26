@@ -1,8 +1,10 @@
 ﻿using be_artwork_sharing_platform.Core.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography;
 
 namespace be_project_swp.Core.Entities
 {
+    [Table("reports")]
     public class Report 
     {
         public long Id { get; set; }

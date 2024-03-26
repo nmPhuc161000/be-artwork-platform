@@ -24,13 +24,13 @@
     </PackageReference>
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.9.0" />
     <PackageReference Include="NETCore.MailKit" Version="2.1.0" />
+    <PackageReference Include="PayPal" Version="1.9.1" />
     <PackageReference Include="PayPalCheckoutSdk" Version="1.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Core\Dtos\Order\" />
-    <Folder Include="Core\Dtos\Wallet\" />
   </ItemGroup>
 
 </Project>
