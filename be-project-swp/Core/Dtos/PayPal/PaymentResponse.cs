@@ -1,13 +1,13 @@
 ﻿namespace be_project_swp.Core.Dtos.PayPal;
 public class OrderResponse
 {
-    public string Id { get; set; }
-    public List<Link> Links { get; set; }
+    public string id { get; set; }
+    public List<Link> links { get; set; }
 }
 
 public class Link
 {
-    public string Href { get; set; }
-    public string Rel { get; set; }
-    public string Method { get; set; }
+    public string href { get; set; }
+    public string rel { get; set; }
+    public string method { get; set; }
 }
