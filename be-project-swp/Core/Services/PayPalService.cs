@@ -48,7 +48,7 @@ namespace be_project_swp.Core.Services
                     return await _httpClient.SendAsync(request);
                 }*/
 
-        public async Task<OrderResponse> CreateOrder(decimal amount)
+        public async Task<OrderAndTokenResponse> CreateOrder(decimal amount)
         {
             string currency = "usd";
             var request = new HttpRequestMessage(HttpMethod.Post, "https://api.sandbox.paypal.com/v2/checkout/orders");
@@ -76,8 +76,16 @@ namespace be_project_swp.Core.Services
             var response = await _httpClient.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
+
                 var jsonResponse = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<OrderResponse>(jsonResponse);
+                var orderResponse = JsonSerializer.Deserialize<OrderResponse>(jsonResponse);
+                var accessToken = await GetAccessToken();
+
+                return new OrderAndTokenResponse
+                {
+                    Order = orderResponse,
+                    AccessToken = accessToken
+                };
             }
             else
             {

@@ -11,3 +11,9 @@ public class Link
     public string rel { get; set; }
     public string method { get; set; }
 }
+
+public class OrderAndTokenResponse
+{
+    public OrderResponse Order { get; set; }
+    public string AccessToken { get; set; }
+}
