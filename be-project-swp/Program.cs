@@ -12,6 +12,7 @@ using System.Text.Json.Serialization;
 using be_project_swp.Core.Interfaces;
 using be_project_swp.Core.Services;
 using be_project_swp.Core.Dtos.Email;
+using be_project_swp.Core.Dtos.PayPal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,15 +40,14 @@ builder.Services.AddScoped<IFavouriteService, FavouriteService>();
 builder.Services.AddScoped<IRequestOrderService, RequestOrderService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IWalletService, WalletService>();
-builder.Services.AddScoped<IPayPalService, PayPalService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<IPayPalService, PayPalService>();
 
 //Paypal
-/*builder.Services.AddSingleton<IPayPalService>();*/
+builder.Services.AddHttpClient();
 builder.Services.AddHttpClient("PayPalClient", client =>
 {
-    // C?u hình HttpClient t?i ?ây n?u c?n thi?t
     client.BaseAddress = new Uri("https://api.paypal.com/");
 });
 

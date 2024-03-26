@@ -1,4 +1,4 @@
-﻿ using be_artwork_sharing_platform.Core.Dtos.Auth;
+﻿using be_artwork_sharing_platform.Core.Dtos.Auth;
 using be_artwork_sharing_platform.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using be_artwork_sharing_platform.Core.Entities;
@@ -101,7 +101,61 @@ namespace be_artwork_sharing_platform.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
+        [Route("send-password-reset-code")]
+        public async Task<IActionResult> SendPasswordResetCode(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Email should not be empty");
+            }
+            var user = await _userManager.FindByEmailAsync(email);
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            int otp = RandomNumberGenerator.Generate(100000, 999999);
+
+            var resetPassword = new ResetPassword()
+            {
+                Email = email,
+                OTP = otp.ToString(),
+                Token = token,
+                User_Id = user.Id,
+                InsertDateTimeUTC = DateTime.UtcNow
+            };
+            await _context.ResetPasswords.AddAsync(resetPassword);
+            await _context.SaveChangesAsync();
+
+            await be_project_swp.Core.Services.EmailService.SendEmailAsync(email, "Reset Password OTP", "Hello " + email + "<br><br>Please find the reset password token bellow<br><br><b>" + otp + "<b><br><br>Thanks<br>ArtworkSharingPlatform.com");
+            return Ok("Token sent successfully in email");
+        }
+
+        [HttpPost]
+        [Route("reset-password")]
+        public async Task<IActionResult> ResetPassword(string email, string otp, ResetPasswordModel resetPasswordModel)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(resetPasswordModel.Password))
+            {
+                return BadRequest("Email $ New Password should not be empty");
+            }
+            var user = await _userManager.FindByEmailAsync(email);
+            var resetPassworDetail = await _context.ResetPasswords
+                .Where(rp => rp.OTP == otp && rp.User_Id == user.Id)
+                .OrderByDescending(rp => rp.InsertDateTimeUTC)
+                .FirstOrDefaultAsync();
+            var expirationDateTimeUtc = resetPassworDetail.InsertDateTimeUTC.AddMinutes(15);
+            if (expirationDateTimeUtc < DateTime.UtcNow)
+            {
+                return BadRequest("OTP is expired, please generate the new OTP");
+            }
+            var res = await _userManager.ResetPasswordAsync(user, resetPassworDetail.Token, resetPasswordModel.Password);
+            if (!res.Succeeded)
+            {
+                return BadRequest();
+            }
+            return Ok();
+        }
+
+        /*        [HttpGet]
         [Route("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
         {
@@ -117,7 +171,7 @@ namespace be_artwork_sharing_platform.Controllers
             }
             return StatusCode(StatusCodes.Status500InternalServerError,
                         new Response { Status = "Error", Message = "This user does not exist" });
-        }
+        }*/
 
         /*[HttpPost]
         [Route("forgot-password")]
@@ -181,59 +235,5 @@ namespace be_artwork_sharing_platform.Controllers
             return StatusCode(StatusCodes.Status200OK,
                         new Response { Status = "Success", Message = "Email Verified successfully" });
         }*/
-
-        [HttpPost]
-        [Route("send-password-reset-code")]
-        public async Task<IActionResult> SendPasswordResetCode(string email)
-        {
-            if (string.IsNullOrEmpty(email))
-            {
-                return BadRequest("Email should not be empty");
-            }
-            var user = await _userManager.FindByEmailAsync(email);
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            int otp = RandomNumberGenerator.Generate(100000, 999999);
-
-            var resetPassword = new ResetPassword()
-            {
-                Email = email,
-                OTP = otp.ToString(),
-                Token = token,
-                User_Id = user.Id,
-                InsertDateTimeUTC = DateTime.UtcNow
-            };
-            await _context.ResetPasswords.AddAsync(resetPassword);
-            await _context.SaveChangesAsync();
-
-            await be_project_swp.Core.Services.EmailService.SendEmailAsync(email, "Reset Password OTP", "Hello " + email + "<br><br>Please find the reset password token bellow<br><br><b>" + otp + "<b><br><br>Thanks<br>oktest.com");
-            return Ok("Token sent successfully in email");
-        }
-
-        [HttpPost]
-        [Route("reset-password")]
-        public async Task<IActionResult> ResetPassword(string email, string otp, ResetPasswordModel resetPasswordModel)
-        {
-            if(string.IsNullOrEmpty(email) || string.IsNullOrEmpty(resetPasswordModel.Password))
-            {
-                return BadRequest("Email $ New Password should not be empty");
-            }
-            var user = await _userManager.FindByEmailAsync(email);
-            var resetPassworDetail = await _context.ResetPasswords
-                .Where(rp => rp.OTP == otp && rp.User_Id == user.Id)
-                .OrderByDescending(rp => rp.InsertDateTimeUTC)
-                .FirstOrDefaultAsync();
-            var expirationDateTimeUtc = resetPassworDetail.InsertDateTimeUTC.AddMinutes(15);
-            if(expirationDateTimeUtc < DateTime.UtcNow)
-            {
-                return BadRequest("OTP is expired, please generate the new OTP");
-            }
-            var res = await _userManager.ResetPasswordAsync(user, resetPassworDetail.Token, resetPasswordModel.Password);
-            if(!res.Succeeded)
-            {
-                return BadRequest();
-            }
-            return Ok();
-        }
     }
 }

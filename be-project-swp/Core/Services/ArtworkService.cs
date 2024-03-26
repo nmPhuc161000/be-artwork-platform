@@ -14,13 +14,11 @@ namespace be_artwork_sharing_platform.Core.Services
     public class ArtworkService : IArtworkService
     {
         private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _webHostEnvironment;
 
 
-        public ArtworkService(ApplicationDbContext context, IWebHostEnvironment hostEnvironment, IWebHostEnvironment webHostEnvironment)
+        public ArtworkService(ApplicationDbContext context)
         {
             _context = context;
-            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<IEnumerable<ArtworkDto>> GetAll()

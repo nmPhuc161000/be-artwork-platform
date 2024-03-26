@@ -8,6 +8,7 @@ namespace be_project_swp.Core.Entities
     {
         public string User_Id { get; set; }
         public double Balance { get; set; }
+        [ForeignKey("UserId")]
 
         public ApplicationUser User { get; set; }
     }
