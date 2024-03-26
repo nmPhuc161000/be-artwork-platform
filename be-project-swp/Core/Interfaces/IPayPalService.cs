@@ -6,7 +6,7 @@ namespace be_project_swp.Core.Interfaces
 {
     public interface IPayPalService
     {
-        Task<OrderResponse> CreateOrder(decimal amount);
+        Task<OrderAndTokenResponse> CreateOrder(decimal amount);
 /*        Task<GeneralServiceResponseDto> CapturePayment(string orderId);*/
         Task<string> GetAccessToken();
     }
