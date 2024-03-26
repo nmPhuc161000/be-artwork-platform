@@ -68,6 +68,51 @@ namespace be_project_swp.Controllers
                    return StatusCode(result.StatusCode, result.Message);
                }*/
 
+        /*        [HttpPost]
+                [Route("create-payment")]
+                [Authorize]
+                public async Task<IActionResult> CreatePayment(decimal amount)
+                {
+                    try
+                    {
+                        var orderResponse = await _payPalService.CreateOrder(amount);
+                        return Ok(orderResponse);
+                    }
+                    catch (Exception ex)
+                    {
+                        return BadRequest(new { Message = ex.Message });
+                    }
+                }
+
+                [HttpPost]
+                [Route("capture-payment")]
+                [Authorize]
+                public async Task<IActionResult> CapturePayment(string orderId)
+                {
+                    try
+                    {
+                        var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await _payPalService.GetAccessToken());
+                        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        var response = await _httpClient.SendAsync(request);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var jsonResponse = await response.Content.ReadAsStringAsync();
+                            return Ok(jsonResponse);
+                        }
+                        else
+                        {
+                            return BadRequest(new { Message = "Failed to capture payment." });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return BadRequest(new { Message = ex.Message });
+                    }
+                }*/
+
         [HttpPost]
         [Route("create-payment")]
         [Authorize]
@@ -91,12 +136,7 @@ namespace be_project_swp.Controllers
         {
             try
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await _payPalService.GetAccessToken());
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                var response = await _httpClient.SendAsync(request);
-
+                var response = await SendCaptureRequest(orderId);
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -111,6 +151,15 @@ namespace be_project_swp.Controllers
             {
                 return BadRequest(new { Message = ex.Message });
             }
+        }
+
+        private async Task<HttpResponseMessage> SendCaptureRequest(string orderId)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await _payPalService.GetAccessToken());
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            return await _httpClient.SendAsync(request);
         }
     }
 }

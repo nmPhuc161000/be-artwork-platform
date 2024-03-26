@@ -110,47 +110,47 @@ namespace be_project_swp.Core.Services
             }
         }
 
-        /*        public async Task<GeneralServiceResponseDto> CapturePayment(string orderId)
+        public async Task<GeneralServiceResponseDto> CapturePayment(string orderId)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var responseObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
+                if (responseObject.TryGetValue("status", out var status) && status.ToString() == "COMPLETED")
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
-                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    var response = await _httpClient.SendAsync(request);
-
-                    if (response.IsSuccessStatusCode)
+                    return new GeneralServiceResponseDto()
                     {
-                        var jsonResponse = await response.Content.ReadAsStringAsync();
-                        var responseObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
-                        if (responseObject.TryGetValue("status", out var status) && status.ToString() == "COMPLETED")
-                        {
-                            return new GeneralServiceResponseDto()
-                            {
-                                IsSucceed = true,
-                                StatusCode = 200,
-                                Message = "Payment successfully captured."
-                            };
-                        }
-                        else
-                        {
-                            return new GeneralServiceResponseDto()
-                            {
-                                IsSucceed = false,
-                                StatusCode = 400,
-                                Message = "Unable to capture payment."
-                            };
-                        }
-                    }
-                    else
+                        IsSucceed = true,
+                        StatusCode = 200,
+                        Message = "Payment successfully captured."
+                    };
+                }
+                else
+                {
+                    return new GeneralServiceResponseDto()
                     {
-                        return new GeneralServiceResponseDto()
-                        {
-                            IsSucceed = false,
-                            StatusCode = 400,
-                            Message = "Failed to capture payment."
-                        };
-                    }
-                }*/
+                        IsSucceed = false,
+                        StatusCode = 400,
+                        Message = "Unable to capture payment."
+                    };
+                }
+            }
+            else
+            {
+                return new GeneralServiceResponseDto()
+                {
+                    IsSucceed = false,
+                    StatusCode = 400,
+                    Message = "Failed to capture payment."
+                };
+            }
+        }
     }
 }
 //https://api.sandbox.paypal.com/v1/oauth2/token
