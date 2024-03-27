@@ -51,8 +51,9 @@ namespace be_project_swp.Core.Services
         public async Task<OrderAndTokenResponse> CreateOrder(decimal amount)
         {
             string currency = "usd";
+            string accessToken = await GetAccessToken();
             var request = new HttpRequestMessage(HttpMethod.Post, "https://api.sandbox.paypal.com/v2/checkout/orders");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             var orderRequest = new
@@ -79,7 +80,6 @@ namespace be_project_swp.Core.Services
 
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 var orderResponse = JsonSerializer.Deserialize<OrderResponse>(jsonResponse);
-                var accessToken = await GetAccessToken();
 
                 return new OrderAndTokenResponse
                 {
