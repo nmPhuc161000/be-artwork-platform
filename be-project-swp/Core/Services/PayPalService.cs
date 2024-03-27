@@ -56,6 +56,7 @@ namespace be_project_swp.Core.Services
             var request = new HttpRequestMessage(HttpMethod.Post, "https://api.sandbox.paypal.com/v2/checkout/orders");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent("", Encoding.UTF8, "application/json");
 
             var orderRequest = new
             {
@@ -94,73 +95,6 @@ namespace be_project_swp.Core.Services
             }
         }
 
-        public async Task<string> GetAccessToken()
-        {
-            var client = new HttpClient();
-            var byteArray = Encoding.UTF8.GetBytes($"{_configuration["Paypal:ClientId"]}:{_configuration["Paypal:ClientSecret"]}");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-
-            var form = new Dictionary<string, string>
-            {
-                ["grant_type"] = "client_credentials"
-            };
-
-            var response = await client.PostAsync("https://api.sandbox.paypal.com/v1/oauth2/token", new FormUrlEncodedContent(form));
-            var responseBody = await response.Content.ReadAsStringAsync();
-            var tokenDictionary = JsonSerializer.Deserialize<Dictionary<string, object>>(responseBody);
-
-            if (tokenDictionary.TryGetValue("access_token", out object accessToken))
-            {
-                return accessToken.ToString();
-            }
-            else
-            {
-                throw new Exception("Access token not found in PayPal response.");
-            }
-        }
-
-        public async Task<GeneralServiceResponseDto> CapturePayment(string orderId)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            var response = await _httpClient.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                var responseObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
-                if (responseObject.TryGetValue("status", out var status) && status.ToString() == "COMPLETED")
-                {
-                    return new GeneralServiceResponseDto()
-                    {
-                        IsSucceed = true,
-                        StatusCode = 200,
-                        Message = "Payment successfully captured."
-                    };
-                }
-                else
-                {
-                    return new GeneralServiceResponseDto()
-                    {
-                        IsSucceed = false,
-                        StatusCode = 400,
-                        Message = "Unable to capture payment."
-                    };
-                }
-            }
-            else
-            {
-                return new GeneralServiceResponseDto()
-                {
-                    IsSucceed = false,
-                    StatusCode = 400,
-                    Message = "Failed to capture payment."
-                };
-            }
-        }
-
         public async Task<bool> IsPaymentCaptured(string orderId)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}");
@@ -186,7 +120,7 @@ namespace be_project_swp.Core.Services
         {
             var accessToken = await GetAccessToken();
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Content = new StringContent("", Encoding.UTF8, "application/json");
@@ -207,6 +141,74 @@ namespace be_project_swp.Core.Services
                 throw new Exception("Failed to check order status.");
             }
         }
+
+        public async Task<string> GetAccessToken()
+        {
+            var client = new HttpClient();
+            var byteArray = Encoding.UTF8.GetBytes($"{_configuration["Paypal:ClientId"]}:{_configuration["Paypal:ClientSecret"]}");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+
+            var form = new Dictionary<string, string>
+            {
+                ["grant_type"] = "client_credentials"
+            };
+
+            var response = await client.PostAsync("https://api.sandbox.paypal.com/v1/oauth2/token", new FormUrlEncodedContent(form));
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var tokenDictionary = JsonSerializer.Deserialize<Dictionary<string, object>>(responseBody);
+
+            if (tokenDictionary.TryGetValue("access_token", out object accessToken))
+            {
+                return accessToken.ToString();
+            }
+            else
+            {
+                throw new Exception("Access token not found in PayPal response.");
+            }
+        }
+
+        /*        public async Task<GeneralServiceResponseDto> CapturePayment(string orderId)
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
+                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    request.Content = new StringContent("", Encoding.UTF8, "application/json");
+
+                    var response = await _httpClient.SendAsync(request);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonResponse = await response.Content.ReadAsStringAsync();
+                        var responseObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
+                        if (responseObject.TryGetValue("status", out var status) && status.ToString() == "COMPLETED")
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = true,
+                                StatusCode = 200,
+                                Message = "Payment successfully captured."
+                            };
+                        }
+                        else
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 400,
+                                Message = "Unable to capture payment."
+                            };
+                        }
+                    }
+                    else
+                    {
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = false,
+                            StatusCode = 400,
+                            Message = "Failed to capture payment."
+                        };
+                    }
+                }*/
     }
 }
 //https://api.sandbox.paypal.com/v1/oauth2/token
