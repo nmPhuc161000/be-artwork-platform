@@ -83,10 +83,6 @@ namespace be_artwork_sharing_platform.Controllers
         public async Task<IActionResult> UpdateInformation(UpdateInformation updateUser)
         {
             var isExistNickName = _context.Users.FirstOrDefault(u => u.NickName ==  updateUser.NickName);
-            if(isExistNickName != null)
-            {
-                return BadRequest("NickName Already Exist");
-            }
             string userName = HttpContext.User.Identity.Name;
             string userId = await _authService.GetCurrentUserId(userName);
             await _logService.SaveNewLog(userName, "Update Information User");

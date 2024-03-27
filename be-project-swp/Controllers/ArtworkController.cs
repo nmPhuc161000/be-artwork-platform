@@ -105,16 +105,11 @@ namespace be_artwork_sharing_platform.Controllers
                 string userNickNameCurrent = await _authService.GetCurrentNickName(userName);
                 await _artworkService.CreateArtwork(artworkDto, userId, userNickNameCurrent);
                 await _logService.SaveNewLog(userName, "Create New Artwork");
-                return Ok(new GeneralServiceResponseDto()
-                {
-                    IsSucceed = true,
-                    StatusCode = 204,
-                    Message = "Create new Artwork Successfully"
-                });
+                return Ok("Create Artwork Successfully");
             }
             catch
             {
-                return BadRequest("Create new Artwork Failed");
+                return BadRequest("Create Artwork Failed");
             }
         }
 

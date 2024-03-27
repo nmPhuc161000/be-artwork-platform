@@ -44,6 +44,7 @@ namespace be_project_swp.Controllers
                     bool paymentSuccessful = await _payPalService.IsPaymentCaptured(orderResponse.Order.id);
                     if (paymentSuccessful)
                     {
+
                         return Ok(new { Message = "Payment successfully captured." });
                     }
                     else

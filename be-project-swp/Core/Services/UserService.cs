@@ -25,13 +25,22 @@ namespace be_artwork_sharing_platform.Core.Services
             var user = _context.Users.FirstOrDefault(u => u.Id.Equals(userId));
             if (user is not null)
             {
-                user.NickName = updateUser.NickName;
-                user.Email = updateUser.Email;
-                user.Address = updateUser.Address;
-                user.PhoneNumber = updateUser.PhoneNo;
+                if (!string.IsNullOrEmpty(updateUser.NickName))
+                    user.NickName = updateUser.NickName;
+
+                if (!string.IsNullOrEmpty(updateUser.Email))
+                    user.Email = updateUser.Email;
+
+                if (!string.IsNullOrEmpty(updateUser.Address))
+                    user.Address = updateUser.Address;
+
+                if (!string.IsNullOrEmpty(updateUser.PhoneNo))
+                    user.PhoneNumber = updateUser.PhoneNo;
+
+                _context.Update(user);
+                _context.SaveChanges();
+
             }
-            _context.Update(user);
-            _context.SaveChanges();
         }
 
         public async Task UpdateUser(UpdateStatusUser updateStatusUser, string userId)
