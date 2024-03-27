@@ -9,7 +9,7 @@ namespace be_artwork_sharing_platform.Core.Dtos.User
         [StringLength(30)]
         public string NickName { get; set; }
         [Required]
-        [StringLength(30)]
+        [StringLength(50)]
         [RegularExpression(RegexConst.EMAIL, ErrorMessage = "Invalid email address")]
         public string Email { get; set; }
         public string Address { get; set; } = string.Empty;

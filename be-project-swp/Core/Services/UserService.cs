@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mail;
 using System.Net;
+using be_artwork_sharing_platform.Core.Dtos.General;
 
 namespace be_artwork_sharing_platform.Core.Services
 {
@@ -20,27 +21,63 @@ namespace be_artwork_sharing_platform.Core.Services
             _context = context;
         }
 
-        public async Task UpdateInformation(UpdateInformation updateUser, string userId)
+        public async Task<GeneralServiceResponseDto> UpdateInformation(UpdateInformation updateUser, string userId)
         {
             var user = _context.Users.FirstOrDefault(u => u.Id.Equals(userId));
-            if (user is not null)
+            if (user is null)
             {
-                if (!string.IsNullOrEmpty(updateUser.NickName))
-                    user.NickName = updateUser.NickName;
-
-                if (!string.IsNullOrEmpty(updateUser.Email))
-                    user.Email = updateUser.Email;
-
-                if (!string.IsNullOrEmpty(updateUser.Address))
-                    user.Address = updateUser.Address;
-
-                if (!string.IsNullOrEmpty(updateUser.PhoneNo))
-                    user.PhoneNumber = updateUser.PhoneNo;
-
-                _context.Update(user);
-                _context.SaveChanges();
-
+                return new GeneralServiceResponseDto()
+                {
+                    IsSucceed = false,
+                    StatusCode = 404,
+                    Message = "User not found"
+                };
             }
+            if (!string.IsNullOrEmpty(updateUser.NickName) && updateUser.NickName != user.NickName)
+            {
+                var isExistNickName = _context.Users.FirstOrDefault(u => u.NickName == updateUser.NickName);
+                if (isExistNickName is not null)
+                {
+                    return new GeneralServiceResponseDto()
+                    {
+                        IsSucceed = false,
+                        StatusCode = 400,
+                        Message = "NickName Already Exist"
+                    };
+                }
+                user.NickName = updateUser.NickName;
+            }
+
+            if (!string.IsNullOrEmpty(updateUser.Email) && updateUser.Email != user.Email)
+            {
+                var isExistEmail = await _userManager.FindByEmailAsync(updateUser.Email);
+                if (isExistEmail is not null)
+                {
+                    return new GeneralServiceResponseDto()
+                    {
+                        IsSucceed = false,
+                        StatusCode = 400,
+                        Message = "Email Already Exist"
+                    };
+                }
+                user.Email = updateUser.Email;
+            }
+
+            if (!string.IsNullOrEmpty(updateUser.Address))
+                user.Address = updateUser.Address;
+
+            if (!string.IsNullOrEmpty(updateUser.PhoneNo))
+                user.PhoneNumber = updateUser.PhoneNo;
+
+            _context.Update(user);
+            _context.SaveChanges();
+
+            return new GeneralServiceResponseDto()
+            {
+                IsSucceed = true,
+                StatusCode = 200,
+                Message = "User information updated successfully"
+            };
         }
 
         public async Task UpdateUser(UpdateStatusUser updateStatusUser, string userId)
