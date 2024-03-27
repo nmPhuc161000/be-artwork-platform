@@ -307,7 +307,10 @@ namespace be_project_swp.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.HasKey("Name");
 

@@ -115,7 +115,6 @@ builder.Services.AddSwaggerGen(options =>
         BearerFormat = "JWT",
         Scheme = "bearer"
     });
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API Name", Version = "v1" });
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {

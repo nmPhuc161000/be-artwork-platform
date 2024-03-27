@@ -70,6 +70,8 @@ namespace be_artwork_sharing_platform.Core.DbContext
             {
                 e.ToTable("logs");
             });
+            builder.Entity<Category>()
+                .Property(e => e.Id).ValueGeneratedOnAdd();
 
             builder.Entity<Artwork>()
                 .HasOne(a => a.User)

@@ -232,7 +232,6 @@ namespace be_artwork_sharing_platform.Core.Services
                 Price = artworkDto.Price,
                 Url_Image = artworkDto.Url_Image,
             };
-            
             await _context.Artworks.AddAsync(artwork);
             await _context.SaveChangesAsync();
         }

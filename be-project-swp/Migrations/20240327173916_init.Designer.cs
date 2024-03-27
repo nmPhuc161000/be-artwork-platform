@@ -12,7 +12,7 @@ using be_artwork_sharing_platform.Core.DbContext;
 namespace be_project_swp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240324083820_init")]
+    [Migration("20240327173916_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -310,7 +310,10 @@ namespace be_project_swp.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.HasKey("Name");
 
