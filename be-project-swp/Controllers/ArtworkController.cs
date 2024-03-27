@@ -102,8 +102,8 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                string userFullNameCurrent = await _authService.GetCurrentNickName(userName);
-                await _artworkService.CreateArtwork(artworkDto, userId, userFullNameCurrent);
+                string userNickNameCurrent = await _authService.GetCurrentNickName(userName);
+                await _artworkService.CreateArtwork(artworkDto, userId, userNickNameCurrent);
                 await _logService.SaveNewLog(userName, "Create New Artwork");
                 return Ok(new GeneralServiceResponseDto()
                 {
