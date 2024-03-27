@@ -18,55 +18,101 @@ namespace be_project_swp.Controllers
     {
         private readonly IPayPalService _payPalService;
         private readonly HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
 
-        public PaymentController(IPayPalService payPalService, HttpClient httpClient, IConfiguration configuration)
+        public PaymentController(IPayPalService payPalService, HttpClient httpClient)
         {
             _payPalService = payPalService;
             _httpClient = httpClient;
-            _configuration = configuration;
+        }
+
+        [HttpPost]
+        [Route("create-payment")]
+        [Authorize]
+        public async Task<IActionResult> CreatePayment(decimal amount)
+        {
+            try
+            {
+                var orderResponse = await _payPalService.CreateOrder(amount);
+                var orderCreated = await _payPalService.IsOrderCreated(orderResponse.Order.id);
+                if (!orderCreated)
+                {
+                    return BadRequest(new { Message = "Order not found or not yet created." });
+                }
+                var response = await SendCaptureRequest(orderResponse.Order.id);
+                if (response.IsSuccessStatusCode)
+                {
+                    bool paymentSuccessful = await _payPalService.IsPaymentCaptured(orderResponse.Order.id);
+                    if (paymentSuccessful)
+                    {
+                        return Ok(new { Message = "Payment successfully captured." });
+                    }
+                    else
+                    {
+                        return BadRequest(new { Message = "Payment failed." });
+                    }
+                }
+                else
+                {
+                    return BadRequest(new { Message = "Failed to capture payment." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        private async Task<HttpResponseMessage> SendCaptureRequest(string orderId)
+        {
+            var accessToken = await _payPalService.GetAccessToken();
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent("", Encoding.UTF8, "application/json");
+
+            return await _httpClient.SendAsync(request);
         }
 
         /*       [HttpPost]
-               [Route("create-payment")]
-               [Authorize]
-               public async Task<IActionResult> CreateOrder(decimal amount)
-               {
-                   var response = await _payPalService.CreateOrder(amount);
+       [Route("create-payment")]
+       [Authorize]
+       public async Task<IActionResult> CreateOrder(decimal amount)
+       {
+           var response = await _payPalService.CreateOrder(amount);
 
-                   if (response != null && response.IsSuccessStatusCode)
+           if (response != null && response.IsSuccessStatusCode)
+           {
+               var jsonResponse = await response.Content.ReadAsStringAsync();
+               var responseObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
+               if (responseObject.TryGetValue("links", out var links))
+               {
+                   if (links is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Array)
                    {
-                       var jsonResponse = await response.Content.ReadAsStringAsync();
-                       var responseObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
-                       if (responseObject.TryGetValue("links", out var links))
-                       {
-                           if (links is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Array)
-                           {
-                               return Ok(new { Links = links });
-                           }
-                           else
-                           {
-                               var orderId = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonResponse)["id"];
-                               return Ok(new { OrderId = orderId });
-                           }
-                       }
-                       else
-                       {
-                           var orderId = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonResponse)["id"];
-                           return Ok(new { OrderId = orderId });
-                       }
+                       return Ok(new { Links = links });
                    }
-                   return BadRequest();
+                   else
+                   {
+                       var orderId = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonResponse)["id"];
+                       return Ok(new { OrderId = orderId });
+                   }
                }
-
-               [HttpPost]
-               [Route("capture-payment")]
-               [Authorize]
-               public async Task<IActionResult> CapturePayment(string orderId)
+               else
                {
-                   var result = await _payPalService.CapturePayment(orderId);
-                   return StatusCode(result.StatusCode, result.Message);
-               }*/
+                   var orderId = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonResponse)["id"];
+                   return Ok(new { OrderId = orderId });
+               }
+           }
+           return BadRequest();
+       }
+
+       [HttpPost]
+       [Route("capture-payment")]
+       [Authorize]
+       public async Task<IActionResult> CapturePayment(string orderId)
+       {
+           var result = await _payPalService.CapturePayment(orderId);
+           return StatusCode(result.StatusCode, result.Message);
+       }*/
 
         /*        [HttpPost]
                 [Route("create-payment")]
@@ -113,67 +159,40 @@ namespace be_project_swp.Controllers
                     }
                 }*/
 
-        [HttpPost]
-        [Route("create-payment")]
-        [Authorize]
-        public async Task<IActionResult> CreatePayment(decimal amount)
-        {
-            try
-            {
-                var orderResponse = await _payPalService.CreateOrder(amount);
-                return Ok(orderResponse);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Message = ex.Message });
-            }
-        }
-
-        [HttpPost]
-        [Route("capture-payment")]
-        [Authorize]
-        public async Task<IActionResult> CapturePayment(string orderId)
-        {
-            try
-            {
-                var orderCreated = await _payPalService.IsOrderCreated(orderId);
-                if (!orderCreated)
+        /*        [HttpPost]
+                [Route("capture-payment")]
+                [Authorize]
+                public async Task<IActionResult> CapturePayment(string orderId)
                 {
-                    return BadRequest(new { Message = "Order not found or not yet created." });
-                }
-                var response = await SendCaptureRequest(orderId);
-                if (response.IsSuccessStatusCode)
-                {
-                    bool paymentSuccessful = await _payPalService.IsPaymentCaptured(orderId);
-                    if (paymentSuccessful)
+                    try
                     {
-                        return Ok(new { Message = "Payment successfully captured." });
+                        var orderCreated = await _payPalService.IsOrderCreated(orderId);
+                        if (!orderCreated)
+                        {
+                            return BadRequest(new { Message = "Order not found or not yet created." });
+                        }
+                        var response = await SendCaptureRequest(orderId);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            bool paymentSuccessful = await _payPalService.IsPaymentCaptured(orderId);
+                            if (paymentSuccessful)
+                            {
+                                return Ok(new { Message = "Payment successfully captured." });
+                            }
+                            else
+                            {
+                                return BadRequest(new { Message = "Payment failed." });
+                            }
+                        }
+                        else
+                        {
+                            return BadRequest(new { Message = "Failed to capture payment." });
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        return BadRequest(new { Message = "Payment failed." });
+                        return BadRequest(new { Message = ex.Message });
                     }
-                }
-                else
-                {
-                    return BadRequest(new { Message = "Failed to capture payment." });
-                }
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { Message = ex.Message });
-            }
-        }
-
-        private async Task<HttpResponseMessage> SendCaptureRequest(string orderId)
-        {
-            var accessToken = await _payPalService.GetAccessToken();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            request.Content = new StringContent("", Encoding.UTF8, "application/json");
-
-            return await _httpClient.SendAsync(request);
-        }
+                }*/
     }
 }
