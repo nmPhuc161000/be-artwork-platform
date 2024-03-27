@@ -9,5 +9,7 @@ namespace be_project_swp.Core.Interfaces
         Task<OrderAndTokenResponse> CreateOrder(decimal amount);
 /*        Task<GeneralServiceResponseDto> CapturePayment(string orderId);*/
         Task<string> GetAccessToken();
+        Task<bool> IsPaymentCaptured(string orderId);
+        Task<bool> IsOrderCreated(string orderId);
     }
 }

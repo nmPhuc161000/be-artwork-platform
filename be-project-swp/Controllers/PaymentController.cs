@@ -136,11 +136,23 @@ namespace be_project_swp.Controllers
         {
             try
             {
+                var orderCreated = await _payPalService.IsOrderCreated(orderId);
+                if (!orderCreated)
+                {
+                    return BadRequest(new { Message = "Order not found or not yet created." });
+                }
                 var response = await SendCaptureRequest(orderId);
                 if (response.IsSuccessStatusCode)
                 {
-                    var jsonResponse = await response.Content.ReadAsStringAsync();
-                    return Ok(jsonResponse);
+                    bool paymentSuccessful = await _payPalService.IsPaymentCaptured(orderId);
+                    if (paymentSuccessful)
+                    {
+                        return Ok(new { Message = "Payment successfully captured." });
+                    }
+                    else
+                    {
+                        return BadRequest(new { Message = "Payment failed." });
+                    }
                 }
                 else
                 {
@@ -155,9 +167,11 @@ namespace be_project_swp.Controllers
 
         private async Task<HttpResponseMessage> SendCaptureRequest(string orderId)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await _payPalService.GetAccessToken());
+            var accessToken = await _payPalService.GetAccessToken();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent("", Encoding.UTF8, "application/json");
 
             return await _httpClient.SendAsync(request);
         }

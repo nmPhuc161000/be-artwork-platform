@@ -2,6 +2,7 @@
 using be_project_swp.Core.Dtos.PayPal;
 using be_project_swp.Core.Interfaces;
 using Microsoft.Extensions.Options;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -157,6 +158,53 @@ namespace be_project_swp.Core.Services
                     StatusCode = 400,
                     Message = "Failed to capture payment."
                 };
+            }
+        }
+
+        public async Task<bool> IsPaymentCaptured(string orderId)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent("", Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var responseObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
+                if (responseObject.TryGetValue("status", out var status) && status.ToString() == "COMPLETED")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public async Task<bool> IsOrderCreated(string orderId)
+        {
+            var accessToken = await GetAccessToken();
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent("", Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+
+            // Kiểm tra xem yêu cầu thành công và đơn hàng tồn tại
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return false; // Đơn hàng không tồn tại
+            }
+            else
+            {
+                throw new Exception("Failed to check order status.");
             }
         }
     }
