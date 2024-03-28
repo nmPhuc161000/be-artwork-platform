@@ -13,6 +13,8 @@ using be_project_swp.Core.Interfaces;
 using be_project_swp.Core.Services;
 using be_project_swp.Core.Dtos.Email;
 using be_project_swp.Core.Dtos.PayPal;
+using Catel.Services;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +52,7 @@ builder.Services.AddHttpClient("PayPalClient", client =>
 {
     client.BaseAddress = new Uri("https://api.paypal.com/");
 });
+
 
 //Config Required Email
 builder.Services.Configure<DataProtectionTokenProviderOptions>(otps => otps.TokenLifespan = TimeSpan.FromHours(10));

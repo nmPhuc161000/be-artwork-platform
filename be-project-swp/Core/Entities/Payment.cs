@@ -10,22 +10,11 @@ namespace be_project_swp.Core.Entities
         [Key]
         [Required]
         public string Id { get; set; }
-        public string MerchantName { get; set; }
-        public string MerchantWebLink { get; set; }
-        public string MerchantIpnUrl { get; set; }
-        public string MerchantReturnIpnUrl { get; set; }
-        public string SecretKey { get; set; }
-        public bool IsActive { get; set; }
-        public string CreatedBy { get; set; }
-        public string LastUpdatedBy { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime LastUpdateAt { get; set; }
+        public string Order_Id { get; set; }
+        public string User_Id { get; set; }
         public long Artwork_Id { get; set; }
         // RelationShip
-        [ForeignKey("InsertUser")]
         public ApplicationUser User { get; set; }
-
-        [ForeignKey("Artwork_Id")]
         public Artwork Artworks { get; set; }
     }
 }

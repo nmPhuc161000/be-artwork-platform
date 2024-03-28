@@ -14,6 +14,9 @@ public class Link
 
 public class OrderAndTokenResponse
 {
-    public OrderResponse Order { get; set; }
     public string AccessToken { get; set; }
+    public string User_Id { get; set; }
+    public long Artwork_Id { get; set; }
+    public string NickName { get; set; }
+    public OrderResponse Order { get; set; }
 }

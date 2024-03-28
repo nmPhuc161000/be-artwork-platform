@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using be_project_swp.Core.Entities;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace be_artwork_sharing_platform.Core.Entities
@@ -25,6 +26,7 @@ namespace be_artwork_sharing_platform.Core.Entities
         [ForeignKey("Category_Name")]
         public Category Category { get; set; }
         public List<Favourite> Favourites { get; set; }
+        public List<Payment> Payments { get; set; }
     }
     
 }

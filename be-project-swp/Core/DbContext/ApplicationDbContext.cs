@@ -23,8 +23,8 @@ namespace be_artwork_sharing_platform.Core.DbContext
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<ResetPassword> ResetPasswords { get; set; }
-/*        public DbSet<Payment> Payments { get; set; }
-        public DbSet<Order> Orders { get; set; }*/
+        public DbSet<Payment> Payments { get; set; }
+/*        public DbSet<Order> Orders { get; set; }*/
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -95,6 +95,21 @@ namespace be_artwork_sharing_platform.Core.DbContext
                 .HasOne(w => w.User)
                 .WithMany(w => w.Wallets)
                 .HasForeignKey(w => w.User_Id);
+            
+            builder.Entity<Payment>()
+                .HasOne(w => w.User)
+                .WithMany(w => w.Payments)
+                .HasForeignKey(w => w.User_Id)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Payment>()
+                .HasOne(w => w.Artworks)
+                .WithMany(w => w.Payments)
+                .HasForeignKey(w => w.Artwork_Id)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Payment>()
+                .Property(p => p.Id).ValueGeneratedOnAdd();
         }
     }
 }

@@ -349,6 +349,30 @@ namespace be_project_swp.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "payments",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Order_Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Artwork_Id = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_payments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_payments_artworks_Artwork_Id",
+                        column: x => x.Artwork_Id,
+                        principalTable: "artworks",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_payments_users_User_Id",
+                        column: x => x.User_Id,
+                        principalTable: "users",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_artworks_Category_Name",
                 table: "artworks",
@@ -367,6 +391,16 @@ namespace be_project_swp.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_favourites_User_Id",
                 table: "favourites",
+                column: "User_Id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_payments_Artwork_Id",
+                table: "payments",
+                column: "Artwork_Id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_payments_User_Id",
+                table: "payments",
                 column: "User_Id");
 
             migrationBuilder.CreateIndex(
@@ -434,6 +468,9 @@ namespace be_project_swp.Migrations
 
             migrationBuilder.DropTable(
                 name: "logs");
+
+            migrationBuilder.DropTable(
+                name: "payments");
 
             migrationBuilder.DropTable(
                 name: "reports");
