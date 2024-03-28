@@ -1,5 +1,7 @@
-﻿using be_artwork_sharing_platform.Core.Dtos.General;
+﻿using be_artwork_sharing_platform.Core.DbContext;
+using be_artwork_sharing_platform.Core.Dtos.General;
 using be_project_swp.Core.Dtos.PayPal;
+using be_project_swp.Core.Entities;
 using be_project_swp.Core.Interfaces;
 using Microsoft.Extensions.Options;
 using System.Net;
@@ -14,12 +16,14 @@ namespace be_project_swp.Core.Services
         private readonly HttpClient _httpClient;
         private readonly IOptions<PayPalSettings> _paypalSettings;
         private readonly IConfiguration _configuration;
+        private readonly ApplicationDbContext _context;
 
-        public PayPalService(HttpClient httpClient, IOptions<PayPalSettings> paypalSettings, IConfiguration configuration)
+        public PayPalService(HttpClient httpClient, IOptions<PayPalSettings> paypalSettings, IConfiguration configuration, ApplicationDbContext context)
         {
             _httpClient = httpClient;
             _paypalSettings = paypalSettings;
             _configuration = configuration;
+            _context = context;
         }
 
         /*        public async Task<OrderResponse> CreateOrder(decimal amount)
@@ -49,7 +53,7 @@ namespace be_project_swp.Core.Services
                     return await _httpClient.SendAsync(request);
                 }*/
 
-        public async Task<OrderAndTokenResponse> CreateOrder(decimal amount)
+        public async Task<OrderAndTokenResponse> CreateOrder(decimal amount, string user_Id, long artwork_Id, string nickName)
         {
             string currency = "usd";
             string accessToken = await GetAccessToken();
@@ -85,8 +89,11 @@ namespace be_project_swp.Core.Services
 
                 return new OrderAndTokenResponse
                 {
-                    Order = orderResponse,
-                    AccessToken = accessToken
+                    AccessToken = accessToken,
+                    User_Id = user_Id,
+                    Artwork_Id = artwork_Id,
+                    NickName = nickName,
+                    Order = orderResponse
                 };
             }
             else
@@ -95,7 +102,7 @@ namespace be_project_swp.Core.Services
             }
         }
 
-        public async Task<bool> IsPaymentCaptured(string orderId)
+        public async Task<bool> IsPaymentCaptured(string orderId, string user_Id, long artwork_Id)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
@@ -110,6 +117,14 @@ namespace be_project_swp.Core.Services
                 var responseObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
                 if (responseObject.TryGetValue("status", out var status) && status.ToString() == "COMPLETED")
                 {
+                    var payment = new Payment()
+                    {
+                        Order_Id = orderId,
+                        User_Id = user_Id,
+                        Artwork_Id = artwork_Id,
+                    };
+                    _context.Payments.Add(payment);
+                    _context.SaveChanges();
                     return true;
                 }
             }
@@ -211,5 +226,3 @@ namespace be_project_swp.Core.Services
                 }*/
     }
 }
-//https://api.sandbox.paypal.com/v1/oauth2/token
-//https://sandbox.paypal.com

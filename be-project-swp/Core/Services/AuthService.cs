@@ -120,7 +120,7 @@ namespace be_artwork_sharing_platform.Core.Services
             }
 
             //Add a Default Customer Role to users
-            await _userManager.AddToRoleAsync(newUser, StaticUserRole.CREATOR);
+            await _userManager.AddToRoleAsync(newUser, StaticUserRole.ADMIN);
             await _logService.SaveNewLog(newUser.UserName, "Register to WebSite");
             return new GeneralServiceResponseDto()
             {

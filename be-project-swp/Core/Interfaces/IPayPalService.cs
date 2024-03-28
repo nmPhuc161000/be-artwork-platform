@@ -6,10 +6,10 @@ namespace be_project_swp.Core.Interfaces
 {
     public interface IPayPalService
     {
-        Task<OrderAndTokenResponse> CreateOrder(decimal amount);
+        Task<OrderAndTokenResponse> CreateOrder(decimal amount, string user_Id, long artwork_Id, string nickName);
 /*        Task<GeneralServiceResponseDto> CapturePayment(string orderId);*/
         Task<string> GetAccessToken();
-        Task<bool> IsPaymentCaptured(string orderId);
+        Task<bool> IsPaymentCaptured(string orderId, string user_Id, long artwork_Id);
         Task<bool> IsOrderCreated(string orderId);
     }
 }

@@ -441,6 +441,32 @@ namespace be_project_swp.Migrations
                     b.ToTable("requestorders");
                 });
 
+            modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<long>("Artwork_Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Order_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("User_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Artwork_Id");
+
+                    b.HasIndex("User_Id");
+
+                    b.ToTable("payments");
+                });
+
             modelBuilder.Entity("be_project_swp.Core.Entities.Report", b =>
                 {
                     b.Property<long>("Id")
@@ -650,6 +676,25 @@ namespace be_project_swp.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>
+                {
+                    b.HasOne("be_artwork_sharing_platform.Core.Entities.Artwork", "Artworks")
+                        .WithMany("Payments")
+                        .HasForeignKey("Artwork_Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("be_artwork_sharing_platform.Core.Entities.ApplicationUser", "User")
+                        .WithMany("Payments")
+                        .HasForeignKey("User_Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Artworks");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("be_project_swp.Core.Entities.ResetPassword", b =>
                 {
                     b.HasOne("be_artwork_sharing_platform.Core.Entities.ApplicationUser", "User")
@@ -678,12 +723,16 @@ namespace be_project_swp.Migrations
 
                     b.Navigation("Favorites");
 
+                    b.Navigation("Payments");
+
                     b.Navigation("Wallets");
                 });
 
             modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.Artwork", b =>
                 {
                     b.Navigation("Favourites");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.Category", b =>

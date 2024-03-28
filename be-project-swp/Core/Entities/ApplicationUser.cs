@@ -19,6 +19,6 @@ namespace be_artwork_sharing_platform.Core.Entities
         public List<Artwork> Artworks { get; set; }
         public List<Favourite> Favorites { get; set; }
         public List<Wallet> Wallets { get; set; }
-
+        public List<Payment> Payments { get; set; }
     }
 }
