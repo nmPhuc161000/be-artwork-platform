@@ -16,25 +16,28 @@ namespace be_artwork_sharing_platform.Controllers
         private readonly IAuthService _authService;
         private readonly ILogService _logService;
         private readonly IMapper _mapper;
-        private readonly ICategoryService _categoryService;
 
-        public ArtworkController(IArtworkService artworkService, IAuthService authService, ILogService logService, IMapper mapper, ICategoryService categoryService)
+        public ArtworkController(IArtworkService artworkService, IAuthService authService, ILogService logService, IMapper mapper)
         {
             _artworkService = artworkService;
             _authService = authService;
             _logService = logService;
             _mapper = mapper;
-            _categoryService = categoryService;
         }
 
         [HttpGet]
         [Route("get-all")]
         public async Task<IActionResult> GetAll()
         {
-            var artworks = await _artworkService.GetAll();
-            if (artworks is null)
-                return null;
-            return Ok(artworks);
+            try
+            {
+                var artworks = await _artworkService.GetAll();
+                return Ok(artworks);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost]
@@ -52,12 +55,18 @@ namespace be_artwork_sharing_platform.Controllers
         [Authorize(Roles = StaticUserRole.CREATOR)]
         public async Task<IActionResult> GetByUserIdAsync()
         {
-            string userName = HttpContext.User.Identity.Name;
-            string userId = await _authService.GetCurrentUserId(userName);
-            var artworks = await _artworkService.GetArtworkByUserId(userId);
-            if (artworks is null) return null;
-            return Ok(artworks);
-
+            try
+            {
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                var artworks = await _artworkService.GetArtworkByUserId(userId);
+                if (artworks is null) return null;
+                return Ok(artworks);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet]
@@ -96,16 +105,16 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpPost]
         [Route("create")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> Create(CreateArtwork artworkDto)
+        public async Task<ActionResult<GeneralServiceResponseDto>> Create(CreateArtwork artworkDto)
         {
             try
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
                 string userNickNameCurrent = await _authService.GetCurrentNickName(userName);
-                await _artworkService.CreateArtwork(artworkDto, userId, userNickNameCurrent);
+                var result = await _artworkService.CreateArtwork(artworkDto, userId, userNickNameCurrent);
                 await _logService.SaveNewLog(userName, "Create New Artwork");
-                return Ok("Create Artwork Successfully");
+                return StatusCode(result.StatusCode, result.Message);
             }
             catch
             {
@@ -116,35 +125,18 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpDelete]
         [Route("delete/{id}")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> Delete([FromRoute] long id)
+        public async Task<ActionResult<GeneralServiceResponseDto>> Delete([FromRoute] long id)
         {
             try
             {
                 string userName = HttpContext.User.Identity.Name;
-                var result = _artworkService.Delete(id);
-                if(result > 0)
-                {
-                    _logService.SaveNewLog(userName, "Delete Artwork");
-                    return Ok(new GeneralServiceResponseDto
-                    {
-                        IsSucceed = true,
-                        StatusCode = 200,
-                        Message = "Delete Artwork Successfully"
-                    });
-                }
-                else
-                {
-                    return NotFound(new GeneralServiceResponseDto
-                    {
-                        IsSucceed = true,
-                        StatusCode = 404,
-                        Message = "Artwork Not Found"
-                    });
-                }
+                string userId = await _authService.GetCurrentUserId(userName);
+                var result = await _artworkService.Delete(id, userId);
+                return StatusCode(result.StatusCode, result.Message);
             }
-            catch
+            catch(Exception ex)
             {
-                return BadRequest("Delete Failed");
+                return BadRequest(ex.Message);
             }
         }
 
@@ -188,7 +180,7 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpPut]
         [Route("update-artwork")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> UpdateArtwork(long id, UpdateArtwork artworkDt)
+        public async Task<ActionResult<GeneralServiceResponseDto>> UpdateArtwork(long id, UpdateArtwork artworkDt)
         {
             try
             {
@@ -196,12 +188,12 @@ namespace be_artwork_sharing_platform.Controllers
                 string userId = await _authService.GetCurrentUserId(userName);
                 string userNameCurrent = await _authService.GetCurrentUserName(userName);
                 await _logService.SaveNewLog(userName, "Update Artwork");
-                await _artworkService.UpdateArtwork(id, artworkDt);
-                return Ok("Update Successfully");
+                var result = await _artworkService.UpdateArtwork(id, artworkDt, userId);
+                return StatusCode(result.StatusCode, result.Message);
             }
-            catch
+            catch(Exception ex) 
             {
-                return BadRequest("Update Failed");
+                return BadRequest(ex.Message);
             }
         }
     }

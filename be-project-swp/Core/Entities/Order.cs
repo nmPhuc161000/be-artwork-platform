@@ -9,9 +9,9 @@ namespace be_project_swp.Core.Entities
         public string User_Id { get; set; }
         public string Payment_Id { get; set; }
         public long Artwork_Id { get; set; }
-
-        //Relationship
-        [ForeignKey("User_Id")]
+        public string NickName_Buyer { get; set; }
+        public string NickName_Seller { get; set; }
+        public double Price { get; set; }
         public ApplicationUser User { get; set; }
         [ForeignKey("Payment_Id")]
         public Payment Payment { get; set; }

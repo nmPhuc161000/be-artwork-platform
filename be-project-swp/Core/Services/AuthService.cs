@@ -120,13 +120,13 @@ namespace be_artwork_sharing_platform.Core.Services
             }
 
             //Add a Default Customer Role to users
-            await _userManager.AddToRoleAsync(newUser, StaticUserRole.ADMIN);
+            await _userManager.AddToRoleAsync(newUser, StaticUserRole.CREATOR);
             await _logService.SaveNewLog(newUser.UserName, "Register to WebSite");
             return new GeneralServiceResponseDto()
             {
                 IsSucceed = true,
                 StatusCode = 200,
-                Message = $"Create New User & Email sent to {newUser.Email} Successfully"
+                Message = $"Create New User Successfully"
             };
         }
 

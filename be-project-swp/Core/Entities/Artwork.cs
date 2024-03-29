@@ -27,6 +27,7 @@ namespace be_artwork_sharing_platform.Core.Entities
         public Category Category { get; set; }
         public List<Favourite> Favourites { get; set; }
         public List<Payment> Payments { get; set; }
+        public List<Order> Orders { get; set; }
     }
     
 }

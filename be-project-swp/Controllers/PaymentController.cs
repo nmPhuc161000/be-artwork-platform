@@ -1,14 +1,18 @@
-﻿using be_artwork_sharing_platform.Core.Interfaces;
+﻿using be_artwork_sharing_platform.Core.DbContext;
+using be_artwork_sharing_platform.Core.Interfaces;
 using be_project_swp.Core.Dtos.PayPal;
+using be_project_swp.Core.Entities;
 using be_project_swp.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PayPal.Api;
 using System.Configuration;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Order = be_project_swp.Core.Entities.Order;
 
 
 namespace be_project_swp.Controllers
@@ -20,12 +24,14 @@ namespace be_project_swp.Controllers
         private readonly IPayPalService _payPalService;
         private readonly HttpClient _httpClient;
         private readonly IAuthService _authService;
+        private readonly ApplicationDbContext _context;
 
-        public PaymentController(IPayPalService payPalService, HttpClient httpClient, IAuthService authService)
+        public PaymentController(IPayPalService payPalService, HttpClient httpClient, IAuthService authService, ApplicationDbContext context)
         {
             _payPalService = payPalService;
             _httpClient = httpClient;
             _authService = authService;
+            _context = context;
         }
 
         /*        [HttpPost]
@@ -113,14 +119,14 @@ namespace be_project_swp.Controllers
         [HttpPost]
         [Route("create-payment")]
         [Authorize]
-        public async Task<IActionResult> CreatePayment(decimal amount, long artwork_Id)
+        public async Task<IActionResult> CreatePayment(long artwork_Id)
         {
             try
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
                 string nickName = await _authService.GetCurrentNickName(userName);
-                var orderResponse = await _payPalService.CreateOrder(amount, userId, artwork_Id, nickName);
+                var orderResponse = await _payPalService.CreateOrder(userId, artwork_Id, nickName);
                 return Ok(orderResponse);
             }
             catch (Exception ex)
@@ -167,6 +173,7 @@ namespace be_project_swp.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
+                string nickName = await _authService.GetCurrentNickName(userName);
                 var orderCreated = await _payPalService.IsOrderCreated(orderId);
                 if (!orderCreated)
                 {
@@ -175,7 +182,7 @@ namespace be_project_swp.Controllers
                 var response = await SendCaptureRequest(orderId);
                 if (response.IsSuccessStatusCode)
                 {
-                    bool paymentSuccessful = await _payPalService.IsPaymentCaptured(orderId, userId, artwork_Id);
+                    bool paymentSuccessful = await _payPalService.IsPaymentCaptured(orderId, userId, artwork_Id, nickName);
                     if (paymentSuccessful)
                     {
                         return Ok(new { Message = "Payment successfully captured." });

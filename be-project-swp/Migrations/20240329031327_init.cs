@@ -297,31 +297,6 @@ namespace be_project_swp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "wallets",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Balance = table.Column<double>(type: "float", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_wallets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_wallets_users_User_Id",
-                        column: x => x.User_Id,
-                        principalTable: "users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "favourites",
                 columns: table => new
                 {
@@ -373,6 +348,46 @@ namespace be_project_swp.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "orders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Payment_Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Artwork_Id = table.Column<long>(type: "bigint", nullable: false),
+                    NickName_Buyer = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NickName_Seller = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<double>(type: "float", nullable: false),
+                    PaymentId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ArtworkId = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_orders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_orders_artworks_ArtworkId",
+                        column: x => x.ArtworkId,
+                        principalTable: "artworks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_orders_payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "payments",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_orders_users_User_Id",
+                        column: x => x.User_Id,
+                        principalTable: "users",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_artworks_Category_Name",
                 table: "artworks",
@@ -391,6 +406,21 @@ namespace be_project_swp.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_favourites_User_Id",
                 table: "favourites",
+                column: "User_Id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_orders_ArtworkId",
+                table: "orders",
+                column: "ArtworkId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_orders_PaymentId",
+                table: "orders",
+                column: "PaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_orders_User_Id",
+                table: "orders",
                 column: "User_Id");
 
             migrationBuilder.CreateIndex(
@@ -453,11 +483,6 @@ namespace be_project_swp.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_wallets_User_Id",
-                table: "wallets",
-                column: "User_Id");
         }
 
         /// <inheritdoc />
@@ -470,7 +495,7 @@ namespace be_project_swp.Migrations
                 name: "logs");
 
             migrationBuilder.DropTable(
-                name: "payments");
+                name: "orders");
 
             migrationBuilder.DropTable(
                 name: "reports");
@@ -497,13 +522,13 @@ namespace be_project_swp.Migrations
                 name: "usertokens");
 
             migrationBuilder.DropTable(
-                name: "wallets");
-
-            migrationBuilder.DropTable(
-                name: "artworks");
+                name: "payments");
 
             migrationBuilder.DropTable(
                 name: "roles");
+
+            migrationBuilder.DropTable(
+                name: "artworks");
 
             migrationBuilder.DropTable(
                 name: "categories");

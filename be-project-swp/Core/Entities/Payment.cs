@@ -16,5 +16,6 @@ namespace be_project_swp.Core.Entities
         // RelationShip
         public ApplicationUser User { get; set; }
         public Artwork Artworks { get; set; }
+        public Order Order { get; set; }
     }
 }

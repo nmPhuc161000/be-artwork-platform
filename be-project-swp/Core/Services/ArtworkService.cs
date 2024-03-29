@@ -4,21 +4,22 @@ using be_artwork_sharing_platform.Core.Dtos.General;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
 using be_project_swp.Core.Dtos.Artwork;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 
 namespace be_artwork_sharing_platform.Core.Services
 {
     public class ArtworkService : IArtworkService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAuthService _authService;
+        private readonly ILogService _logService;
 
 
-        public ArtworkService(ApplicationDbContext context)
+        public ArtworkService(ApplicationDbContext context, IAuthService authService, ILogService logService)
         {
             _context = context;
+            _authService = authService;
+            _logService = logService;
         }
 
         public async Task<IEnumerable<ArtworkDto>> GetAll()
@@ -125,7 +126,9 @@ namespace be_artwork_sharing_platform.Core.Services
 
         public async Task<IEnumerable<GetArtworkByUserId>> GetArtworkByUserId(string user_Id)
         {
-            var artworks = _context.Artworks.Where(a => a.User_Id == user_Id)
+            try
+            {
+                var artworks = _context.Artworks.Where(a => a.User_Id == user_Id)
                 .Select(a => new GetArtworkByUserId
                 {
                     Id = a.Id,
@@ -144,7 +147,12 @@ namespace be_artwork_sharing_platform.Core.Services
 
                 }).ToList()
                 .OrderBy(a => a.CreatedAt);
-            return artworks;
+                return artworks;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task AcceptArtwork(long id, AcceptArtwork acceptArtwork)
@@ -171,7 +179,7 @@ namespace be_artwork_sharing_platform.Core.Services
             _context.SaveChanges();
         }
 
-        public async Task<Artwork> GetById(long id)
+        public async Task<ArtworkDto> GetById(long id)
         {
             var artwork = _context.Artworks.FirstOrDefault(a => a.Id == id);
             if(artwork != null)
@@ -191,12 +199,9 @@ namespace be_artwork_sharing_platform.Core.Services
                     IsActive = artwork.IsActive,
                     IsDeleted = artwork.IsDeleted
                 };
-                return artwork;
+                return artworkDto;
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         public async Task<IEnumerable<ArtworkDto>> GetByNickName(string nickName)
@@ -220,8 +225,18 @@ namespace be_artwork_sharing_platform.Core.Services
             return artworks;
         }
 
-        public async Task CreateArtwork(CreateArtwork artworkDto, string user_Id, string user_Name)
+        public async Task<GeneralServiceResponseDto> CreateArtwork(CreateArtwork artworkDto, string user_Id, string user_Name)
         {
+            var category = _context.Categories.Find(artworkDto.Category_Name);
+            if(category is null)
+            {
+                return new GeneralServiceResponseDto()
+                {
+                    IsSucceed = false,
+                    StatusCode = 404,
+                    Message = "Category not found"
+                };
+            }
             var artwork = new Artwork
             {
                 User_Id = user_Id,
@@ -234,30 +249,128 @@ namespace be_artwork_sharing_platform.Core.Services
             };
             await _context.Artworks.AddAsync(artwork);
             await _context.SaveChangesAsync();
-        }
-
-        public int Delete(long id)
-        {
-            var artwork = _context.Artworks.FirstOrDefault(a => a.Id == id);
-            _context.Remove(artwork);
-            return _context.SaveChanges();
-        }
-
-        public async Task UpdateArtwork(long id, UpdateArtwork updateArtwork)
-        {
-            var artwork = _context.Artworks.FirstOrDefault(a => a.Id == id);
-            if(artwork is not null)
+            return new GeneralServiceResponseDto()
             {
-                artwork.Name = updateArtwork.Name;
-                artwork.Category_Name = updateArtwork.Category_Name;
-                artwork.Description = updateArtwork.Description;
-                artwork.Url_Image = updateArtwork.Url_Image;
-                artwork.Price = updateArtwork.Price;
-                artwork.IsActive = false;
-                artwork.ReasonRefuse = "Processing";
+                IsSucceed = true,
+                StatusCode = 201,
+                Message = "Create Artwork Successfully"
+            };
+        }
+
+        public async Task<GeneralServiceResponseDto> Delete(long id, string user_Id)
+        {
+            try
+            {
+                var artwork = _context.Artworks.FirstOrDefault(a => a.Id == id);
+                var checkUser = _context.Artworks.FirstOrDefault(a => a.User_Id == user_Id && a.Id == id);
+                if (artwork == null)
+                {
+                    return new GeneralServiceResponseDto()
+                    {
+                        IsSucceed = false,
+                        StatusCode = 404,
+                        Message = "Artwork not found"
+                    };
+                }
+                else
+                {
+                    if(checkUser != null)
+                    {
+                        _context.Remove(artwork);
+                        _context.SaveChanges();
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = true,
+                            StatusCode = 200,
+                            Message = "Delete Artwork Successfully"
+                        };
+                    }
+                    else
+                    {
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = false,
+                            StatusCode = 400,
+                            Message = "You can not delete artwork of another user"
+                        };
+                    }
+                }
             }
-            _context.Update(artwork);
-            _context.SaveChanges();
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<GeneralServiceResponseDto> UpdateArtwork(long id, UpdateArtwork updateArtwork, string user_Id)
+        {
+            try
+            {
+                var category = _context.Categories.Find(updateArtwork.Category_Name);
+                var artwork = _context.Artworks.FirstOrDefault(a => a.Id == id);
+                if (artwork is not null)
+                {
+                    var checkUser = _context.Artworks.FirstOrDefault(a => a.User_Id == user_Id && a.Id == id);
+                    if(checkUser is null)
+                    {
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = false,
+                            StatusCode = 400,
+                            Message = "You can not update artwork of another user"
+                        };
+                    }
+                    else
+                    {
+                        if (category is null)
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 404,
+                                Message = "Category not found"
+                            };
+                        }
+                        artwork.Name = updateArtwork.Name;
+                        artwork.Category_Name = updateArtwork.Category_Name;
+                        artwork.Description = updateArtwork.Description;
+                        artwork.Url_Image = updateArtwork.Url_Image;
+                        artwork.Price = updateArtwork.Price;
+                        artwork.IsActive = false;
+                        artwork.ReasonRefuse = "Processing";
+                        _context.Update(artwork);
+                        _context.SaveChanges();
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = true,
+                            StatusCode = 200,
+                            Message = "Update Artwork Successfully"
+                        };
+                    }
+                }
+                else if (artwork is null)
+                {
+                    return new GeneralServiceResponseDto()
+                    {
+                        IsSucceed = false,
+                        StatusCode = 404,
+                        Message = "Artwork not found"
+                    };
+                }
+                else
+                {
+                    return new GeneralServiceResponseDto()
+                    {
+                        IsSucceed = false,
+                        StatusCode = 400,
+                        Message = "Update Artwork Failed"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public bool GetStatusIsActiveArtwork(long id)
