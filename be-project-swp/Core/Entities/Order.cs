@@ -12,6 +12,9 @@ namespace be_project_swp.Core.Entities
         public string NickName_Buyer { get; set; }
         public string NickName_Seller { get; set; }
         public double Price { get; set; }
+        public string Url_Image { get; set; }
+        public string Name_Artwork { get; set; }
+        public string Category_Artwork { get; set; }
         public ApplicationUser User { get; set; }
         [ForeignKey("Payment_Id")]
         public Payment Payment { get; set; }
