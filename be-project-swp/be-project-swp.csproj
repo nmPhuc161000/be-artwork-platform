@@ -30,7 +30,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Dtos\Order\" />
+    <Folder Include="Core\Dtos\Response\" />
+    <Folder Include="Core\Dtos\Paginated\Order\" />
   </ItemGroup>
 
 </Project>

@@ -12,8 +12,8 @@ using be_artwork_sharing_platform.Core.DbContext;
 namespace be_project_swp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240328020658_init")]
-    partial class init
+    [Migration("20240329032057_update")]
+    partial class update
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -444,6 +444,60 @@ namespace be_project_swp.Migrations
                     b.ToTable("requestorders");
                 });
 
+            modelBuilder.Entity("be_project_swp.Core.Entities.Order", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("Artwork_Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NickName_Buyer")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NickName_Seller")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Payment_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("User_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Artwork_Id");
+
+                    b.HasIndex("Payment_Id")
+                        .IsUnique();
+
+                    b.HasIndex("User_Id");
+
+                    b.ToTable("orders");
+                });
+
             modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>
                 {
                     b.Property<string>("Id")
@@ -552,44 +606,6 @@ namespace be_project_swp.Migrations
                     b.ToTable("resetpasswords");
                 });
 
-            modelBuilder.Entity("be_project_swp.Core.Entities.Wallet", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<double>("Balance")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("User_Id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("User_Id");
-
-                    b.ToTable("wallets");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -679,6 +695,33 @@ namespace be_project_swp.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("be_project_swp.Core.Entities.Order", b =>
+                {
+                    b.HasOne("be_artwork_sharing_platform.Core.Entities.Artwork", "Artwork")
+                        .WithMany("Orders")
+                        .HasForeignKey("Artwork_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("be_project_swp.Core.Entities.Payment", "Payment")
+                        .WithOne("Order")
+                        .HasForeignKey("be_project_swp.Core.Entities.Order", "Payment_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("be_artwork_sharing_platform.Core.Entities.ApplicationUser", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("User_Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Artwork");
+
+                    b.Navigation("Payment");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>
                 {
                     b.HasOne("be_artwork_sharing_platform.Core.Entities.Artwork", "Artworks")
@@ -709,31 +752,22 @@ namespace be_project_swp.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("be_project_swp.Core.Entities.Wallet", b =>
-                {
-                    b.HasOne("be_artwork_sharing_platform.Core.Entities.ApplicationUser", "User")
-                        .WithMany("Wallets")
-                        .HasForeignKey("User_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("Artworks");
 
                     b.Navigation("Favorites");
 
-                    b.Navigation("Payments");
+                    b.Navigation("Orders");
 
-                    b.Navigation("Wallets");
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.Artwork", b =>
                 {
                     b.Navigation("Favourites");
+
+                    b.Navigation("Orders");
 
                     b.Navigation("Payments");
                 });
@@ -741,6 +775,12 @@ namespace be_project_swp.Migrations
             modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.Category", b =>
                 {
                     b.Navigation("Artworks");
+                });
+
+            modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>
+                {
+                    b.Navigation("Order")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using be_artwork_sharing_platform.Core.DbContext;
 
@@ -11,9 +12,11 @@ using be_artwork_sharing_platform.Core.DbContext;
 namespace be_project_swp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240329031327_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -449,6 +452,9 @@ namespace be_project_swp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("ArtworkId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("Artwork_Id")
                         .HasColumnType("bigint");
 
@@ -469,9 +475,12 @@ namespace be_project_swp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PaymentId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Payment_Id")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
@@ -485,10 +494,9 @@ namespace be_project_swp.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Artwork_Id");
+                    b.HasIndex("ArtworkId");
 
-                    b.HasIndex("Payment_Id")
-                        .IsUnique();
+                    b.HasIndex("PaymentId");
 
                     b.HasIndex("User_Id");
 
@@ -696,15 +704,13 @@ namespace be_project_swp.Migrations
                 {
                     b.HasOne("be_artwork_sharing_platform.Core.Entities.Artwork", "Artwork")
                         .WithMany("Orders")
-                        .HasForeignKey("Artwork_Id")
+                        .HasForeignKey("ArtworkId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("be_project_swp.Core.Entities.Payment", "Payment")
-                        .WithOne("Order")
-                        .HasForeignKey("be_project_swp.Core.Entities.Order", "Payment_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
 
                     b.HasOne("be_artwork_sharing_platform.Core.Entities.ApplicationUser", "User")
                         .WithMany("Orders")
@@ -772,12 +778,6 @@ namespace be_project_swp.Migrations
             modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.Category", b =>
                 {
                     b.Navigation("Artworks");
-                });
-
-            modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>
-                {
-                    b.Navigation("Order")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

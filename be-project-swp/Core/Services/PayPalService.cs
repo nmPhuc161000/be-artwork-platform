@@ -53,8 +53,14 @@ namespace be_project_swp.Core.Services
                     return await _httpClient.SendAsync(request);
                 }*/
 
-        public async Task<OrderAndTokenResponse> CreateOrder(decimal amount, string user_Id, long artwork_Id, string nickName)
+        public async Task<OrderAndTokenResponse> CreateOrder(string user_Id, long artwork_Id, string nickName)
         {
+            var artwork = _context.Artworks.FirstOrDefault(a => a.Id == artwork_Id);
+            if(artwork == null)
+            {
+                return null;
+            }
+            double amount = artwork.Price;
             string currency = "usd";
             string accessToken = await GetAccessToken();
             var request = new HttpRequestMessage(HttpMethod.Post, "https://api.sandbox.paypal.com/v2/checkout/orders");
@@ -86,7 +92,6 @@ namespace be_project_swp.Core.Services
 
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 var orderResponse = JsonSerializer.Deserialize<OrderResponse>(jsonResponse);
-
                 return new OrderAndTokenResponse
                 {
                     AccessToken = accessToken,
@@ -102,7 +107,7 @@ namespace be_project_swp.Core.Services
             }
         }
 
-        public async Task<bool> IsPaymentCaptured(string orderId, string user_Id, long artwork_Id)
+        public async Task<bool> IsPaymentCaptured(string orderId, string user_Id, long artwork_Id, string nickName)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
@@ -122,8 +127,22 @@ namespace be_project_swp.Core.Services
                         Order_Id = orderId,
                         User_Id = user_Id,
                         Artwork_Id = artwork_Id,
+
                     };
                     _context.Payments.Add(payment);
+                    _context.SaveChanges();
+                    var artwork = _context.Artworks.FirstOrDefault(a => a.Id == artwork_Id);
+                    var user = _context.Users.FirstOrDefault(u => u.Id == user_Id);
+                    var order = new Order()
+                    {
+                        User_Id = user_Id,
+                        Payment_Id = payment.Id,
+                        Artwork_Id = artwork_Id,
+                        NickName_Buyer = nickName,
+                        NickName_Seller = artwork.Nick_Name,
+                        Price = artwork.Price
+                    };
+                    _context.Orders.Add(order);
                     _context.SaveChanges();
                     return true;
                 }
