@@ -140,7 +140,10 @@ namespace be_project_swp.Core.Services
                         Artwork_Id = artwork_Id,
                         NickName_Buyer = nickName,
                         NickName_Seller = artwork.Nick_Name,
-                        Price = artwork.Price
+                        Price = artwork.Price,
+                        Url_Image = artwork.Url_Image,
+                        Name_Artwork = artwork.Name,
+                        Category_Artwork = artwork.Category_Name
                     };
                     _context.Orders.Add(order);
                     _context.SaveChanges();
