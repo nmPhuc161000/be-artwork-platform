@@ -24,7 +24,8 @@ namespace be_project_swp.Core.Services
                 NickName_Buyer = orderBill.NickName_Buyer,
                 NickName_Seller = orderBill.NickName_Seller,
                 Date_Payment = orderBill.CreatedAt,
-                Category_Artwork = orderBill.Category_Artwork
+                Category_Artwork = orderBill.Category_Artwork,
+                Price = orderBill.Price
             };
             return bill;
         }
