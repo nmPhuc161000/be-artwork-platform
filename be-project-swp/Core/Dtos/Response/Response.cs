@@ -1,4 +1,4 @@
-﻿namespace be_project_swp.Core.Dtos.General
+﻿namespace be_project_swp.Core.Dtos.Response
 {
     public class Response
     {

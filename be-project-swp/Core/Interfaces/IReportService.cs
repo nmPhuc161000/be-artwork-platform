@@ -1,5 +1,5 @@
-﻿using be_artwork_sharing_platform.Core.Dtos.General;
-using be_project_swp.Core.Dtos.Report;
+﻿using be_project_swp.Core.Dtos.Report;
+using be_project_swp.Core.Dtos.Response;
 
 namespace be_project_swp.Core.Interfaces
 {

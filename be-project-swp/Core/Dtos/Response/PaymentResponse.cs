@@ -1,4 +1,4 @@
-﻿namespace be_project_swp.Core.Dtos.PayPal;
+﻿namespace be_project_swp.Core.Dtos.Response;
 public class OrderResponse
 {
     public string id { get; set; }
@@ -19,4 +19,12 @@ public class OrderAndTokenResponse
     public long Artwork_Id { get; set; }
     public string NickName { get; set; }
     public OrderResponse Order { get; set; }
+}
+
+public class ResponsePayment
+{
+    public bool IsSucceed { get; set; }
+    public int StatusCode { get; set; }
+    public long Order_Id { get; set; }
+    public string Message { get; set; }
 }
