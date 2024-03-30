@@ -28,5 +28,32 @@ namespace be_project_swp.Core.Services
             };
             return bill;
         }
+
+        public async Task<IEnumerable<GetPaymentHistory>> GetPaymentHistory(string user_Id)
+        {
+            var historyPayments = await _context.Orders.Where(o => o.User_Id == user_Id)
+                .Select(o => new GetPaymentHistory()
+                {
+                    NickNme_Buyer = o.NickName_Buyer,
+                    NickName_Seller = o.NickName_Seller,
+                    Url_Image = o.Url_Image,
+                    Price = o.Price
+                }).ToListAsync();
+            return historyPayments;
+        }
+
+        public async Task<IEnumerable<GetPaymentHistory>> GetMineOrder(string nick_Name)
+        {
+            var orders = await _context.Orders.Where(o => o.NickName_Seller == nick_Name)
+                .Select(o => new GetPaymentHistory()
+                {
+                    NickNme_Buyer = o.NickName_Buyer,
+                    NickName_Seller = o.NickName_Seller,
+                    Url_Image = o.Url_Image,
+                    Price = o.Price
+
+                }).ToListAsync();
+            return orders;
+        }
     }
 }
