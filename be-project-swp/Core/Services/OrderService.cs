@@ -19,6 +19,7 @@ namespace be_project_swp.Core.Services
             var orderBill = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id);
             var bill = new GetResultAfterPayment()
             {
+                Artwork_Id = orderBill.Artwork_Id,
                 Url_Image = orderBill.Url_Image,
                 Name_Artwork = orderBill.Name_Artwork,
                 NickName_Buyer = orderBill.NickName_Buyer,

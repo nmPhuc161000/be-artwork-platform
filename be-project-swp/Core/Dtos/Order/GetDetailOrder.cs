@@ -3,6 +3,7 @@
 public class GetResultAfterPayment
 {
     public string Url_Image { get; set; }
+    public long Artwork_Id { get; set; }
     public string Name_Artwork { get; set; }
     public string NickName_Buyer { get; set; }
     public string NickName_Seller { get; set; }
