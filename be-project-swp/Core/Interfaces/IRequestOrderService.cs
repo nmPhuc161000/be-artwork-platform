@@ -1,6 +1,4 @@
-﻿using be_artwork_sharing_platform.Core.Dtos.Artwork;
-using be_artwork_sharing_platform.Core.Dtos.General;
-using be_artwork_sharing_platform.Core.Dtos.RequestOrder;
+﻿using be_artwork_sharing_platform.Core.Dtos.RequestOrder;
 using be_artwork_sharing_platform.Core.Entities;
 using be_project_swp.Core.Dtos.RequestOrder;
 

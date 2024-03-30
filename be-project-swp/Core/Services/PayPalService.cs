@@ -1,6 +1,6 @@
 ﻿using be_artwork_sharing_platform.Core.DbContext;
-using be_artwork_sharing_platform.Core.Dtos.General;
 using be_project_swp.Core.Dtos.PayPal;
+using be_project_swp.Core.Dtos.Response;
 using be_project_swp.Core.Entities;
 using be_project_swp.Core.Interfaces;
 using Microsoft.Extensions.Options;
@@ -107,7 +107,7 @@ namespace be_project_swp.Core.Services
             }
         }
 
-        public async Task<bool> IsPaymentCaptured(string orderId, string user_Id, long artwork_Id, string nickName)
+        public async Task<ResponsePayment> IsPaymentCaptured(string orderId, string user_Id, long artwork_Id, string nickName)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
@@ -147,10 +147,22 @@ namespace be_project_swp.Core.Services
                     };
                     _context.Orders.Add(order);
                     _context.SaveChanges();
-                    return true;
+                    return new ResponsePayment()
+                    {
+                        IsSucceed = true,
+                        StatusCode = 201,
+                        Order_Id = order.Id,
+                        Message = "Payment successfully captured."
+                    };
                 }
             }
-            return false;
+            return new ResponsePayment()
+            {
+                IsSucceed = false,
+                StatusCode = 400,
+                Order_Id = 0,
+                Message = "Payment failed."
+            };
         }
 
         public async Task<bool> IsOrderCreated(string orderId)

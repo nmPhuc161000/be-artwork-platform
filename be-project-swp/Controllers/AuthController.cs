@@ -10,10 +10,8 @@ using be_project_swp.Core.Entities;
 using be_artwork_sharing_platform.Core.DbContext;
 using ResetPassword = be_project_swp.Core.Entities.ResetPassword;
 using Microsoft.EntityFrameworkCore;
-using NETCore.MailKit.Core;
-using be_project_swp.Core.Services;
-using be_project_swp.Core.Dtos.General;
 using Microsoft.IdentityModel.Tokens;
+using be_project_swp.Core.Dtos.Response;
 
 namespace be_artwork_sharing_platform.Controllers
 {

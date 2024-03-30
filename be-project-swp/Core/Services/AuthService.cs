@@ -2,7 +2,6 @@
 using be_artwork_sharing_platform.Core.DbContext;
 using be_artwork_sharing_platform.Core.Dtos.Artwork;
 using be_artwork_sharing_platform.Core.Dtos.Auth;
-using be_artwork_sharing_platform.Core.Dtos.General;
 using be_artwork_sharing_platform.Core.Dtos.User;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
@@ -18,6 +17,7 @@ using be_project_swp.Core.Entities;
 using be_project_swp.Core.Base;
 using be_project_swp.Core.Dtos.Email;
 using PayPalCheckoutSdk.Orders;
+using be_project_swp.Core.Dtos.Response;
 
 namespace be_artwork_sharing_platform.Core.Services
 {

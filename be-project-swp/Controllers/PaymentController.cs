@@ -1,6 +1,6 @@
 ﻿using be_artwork_sharing_platform.Core.DbContext;
 using be_artwork_sharing_platform.Core.Interfaces;
-using be_project_swp.Core.Dtos.PayPal;
+using be_project_swp.Core.Dtos.Response;
 using be_project_swp.Core.Entities;
 using be_project_swp.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -167,7 +167,7 @@ namespace be_project_swp.Controllers
         [HttpPost]
         [Route("capture-payment")]
         [Authorize]
-        public async Task<IActionResult> CapturePayment(string orderId, long artwork_Id)
+        public async Task<ActionResult<ResponsePayment>> CapturePayment(string orderId, long artwork_Id)
         {
             try
             {
@@ -182,10 +182,16 @@ namespace be_project_swp.Controllers
                 var response = await SendCaptureRequest(orderId);
                 if (response.IsSuccessStatusCode)
                 {
-                    bool paymentSuccessful = await _payPalService.IsPaymentCaptured(orderId, userId, artwork_Id, nickName);
-                    if (paymentSuccessful)
+                    var result = await _payPalService.IsPaymentCaptured(orderId, userId, artwork_Id, nickName);
+                    if (result.IsSucceed)
                     {
-                        return Ok(new { Message = "Payment successfully captured." });
+                        return Ok(new ResponsePayment()
+                        {
+                            IsSucceed = result.IsSucceed,
+                            StatusCode = result.StatusCode,
+                            Message = result.Message,
+                            Order_Id = result.Order_Id
+                        });
                     }
                     else
                     {

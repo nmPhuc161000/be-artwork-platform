@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using be_artwork_sharing_platform.Core.Constancs;
 using be_artwork_sharing_platform.Core.Dtos.Artwork;
-using be_artwork_sharing_platform.Core.Dtos.General;
 using be_artwork_sharing_platform.Core.Interfaces;
+using be_project_swp.Core.Dtos.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
