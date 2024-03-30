@@ -8,6 +8,7 @@ public class GetResultAfterPayment
     public string NickName_Seller { get; set; }
     public DateTime Date_Payment { get; set; }
     public string Category_Artwork { get; set; }
+    public double Price { get; set; }
 }
 
 public class GetPaymentHistory
