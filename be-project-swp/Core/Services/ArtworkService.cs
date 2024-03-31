@@ -5,6 +5,7 @@ using be_artwork_sharing_platform.Core.Interfaces;
 using be_project_swp.Core.Dtos.Artwork;
 using be_project_swp.Core.Dtos.Response;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace be_artwork_sharing_platform.Core.Services
 {
@@ -390,6 +391,30 @@ namespace be_artwork_sharing_platform.Core.Services
             var artworksToDelete = _context.Artworks.Where(a => selectedIds.Contains(a.Id)).ToList();
             _context.RemoveRange(artworksToDelete);
             return _context.SaveChanges();
+        }
+
+        public async Task DownloadImage(string firebaseUrl, string customFolderPath)
+        {
+            var request = new DownloadRequest
+            {
+                FirebaseUrl = firebaseUrl,
+                CustomFolderPath = customFolderPath
+            };
+
+            var httpClient = new HttpClient();
+            var json = JsonSerializer.Serialize(request);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync("https://yourapi.com/download", content);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(result); // Đồng bộ với UI hoặc xử lý kết quả ở đây
+            }
+            else
+            {
+                Console.WriteLine("Failed to download image: " + response.ReasonPhrase);
+            }
         }
     }
 }
