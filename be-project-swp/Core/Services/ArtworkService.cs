@@ -5,6 +5,7 @@ using be_artwork_sharing_platform.Core.Interfaces;
 using be_project_swp.Core.Dtos.Artwork;
 using be_project_swp.Core.Dtos.Response;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace be_artwork_sharing_platform.Core.Services
 {
@@ -392,33 +393,27 @@ namespace be_artwork_sharing_platform.Core.Services
             return _context.SaveChanges();
         }
 
-        public async Task DownloadImageFromFirebase(string url, string filePath)
+        public async Task DownloadImage(string firebaseUrl, string customFolderPath)
         {
-            using (HttpClient client = new HttpClient())
+            var request = new DownloadRequest
             {
-                try
-                {
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        using (Stream imageStream = await response.Content.ReadAsStreamAsync())
-                        {
-                            using (FileStream fileStream = File.Create(filePath))
-                            {
-                                await imageStream.CopyToAsync(fileStream);
-                            }
-                        }
-                        Console.WriteLine("Downloaded successfully as " + filePath);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Failed to download image");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("An error occurred: " + ex.Message);
-                }
+                FirebaseUrl = firebaseUrl,
+                CustomFolderPath = customFolderPath
+            };
+
+            var httpClient = new HttpClient();
+            var json = JsonSerializer.Serialize(request);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync("https://yourapi.com/download", content);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(result); // Đồng bộ với UI hoặc xử lý kết quả ở đây
+            }
+            else
+            {
+                Console.WriteLine("Failed to download image: " + response.ReasonPhrase);
             }
         }
     }

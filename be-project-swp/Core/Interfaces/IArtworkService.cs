@@ -23,6 +23,6 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         Task RefuseArtwork(long id, RefuseArtwork refuseArtwork);
         bool GetStatusIsActiveArtwork(long id);
         bool GetStatusIsDeleteArtwork(long id);
-        Task DownloadImageFromFirebase(string url, string filePath);
+        Task DownloadImage(string firebaseUrl, string customFolderPath);
     }
 }

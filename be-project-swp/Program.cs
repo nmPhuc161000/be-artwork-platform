@@ -24,7 +24,7 @@ builder.Services
     {
         option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-
+builder.Services.AddHttpClient();
 //DB
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -149,6 +149,14 @@ app.UseCors(c => c.SetIsOriginAllowed(isOriginAllowed => true)
 .AllowCredentials().AllowAnyHeader().AllowAnyMethod());
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
+app.UseRouting();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 

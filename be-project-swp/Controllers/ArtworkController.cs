@@ -2,6 +2,7 @@
 using be_artwork_sharing_platform.Core.Constancs;
 using be_artwork_sharing_platform.Core.Dtos.Artwork;
 using be_artwork_sharing_platform.Core.Interfaces;
+using be_project_swp.Core.Dtos.Artwork;
 using be_project_swp.Core.Dtos.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,14 +17,16 @@ namespace be_artwork_sharing_platform.Controllers
         private readonly IAuthService _authService;
         private readonly ILogService _logService;
         private readonly IMapper _mapper;
+        private readonly IHttpClientFactory _clientFactory;
         private const string ImageFolderPath = @"C:\image\";
 
-        public ArtworkController(IArtworkService artworkService, IAuthService authService, ILogService logService, IMapper mapper)
+        public ArtworkController(IArtworkService artworkService, IAuthService authService, ILogService logService, IMapper mapper, IHttpClientFactory clientFactory)
         {
             _artworkService = artworkService;
             _authService = authService;
             _logService = logService;
             _mapper = mapper;
+            _clientFactory = clientFactory;
         }
 
         [HttpGet]
@@ -198,7 +201,7 @@ namespace be_artwork_sharing_platform.Controllers
             }
         }
 
-        [HttpGet]
+        /*[HttpGet]
         [Route("download")]
         public async Task<IActionResult> DownloadImageFromFirebase(string firebaseUrl)
         {
@@ -230,6 +233,111 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 return StatusCode(500, "An error occurred: " + ex.Message);
             }
+        }*/
+
+        /*        [HttpGet]
+                [Route("download")]
+                public async Task<IActionResult> DownloadImageFromFirebase(string firebaseUrl)
+                {
+                    try
+                    {
+                        var client = _clientFactory.CreateClient();
+
+                        HttpResponseMessage response = await client.GetAsync(firebaseUrl);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            Stream imageStream = await response.Content.ReadAsStreamAsync();
+                            return File(imageStream, "application/octet-stream", "image.jpg");
+                        }
+                        else
+                        {
+                            return NotFound("Image not found");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(500, "An error occurred: " + ex.Message);
+                    }
+                }*/
+
+        /*        [HttpGet]
+                [Route("download")]
+                public async Task<IActionResult> DownloadImageFromFirebase(string firebaseUrl, string customFolderPath)
+                {
+                    try
+                    {
+                        if (string.IsNullOrEmpty(customFolderPath))
+                        {
+                            return BadRequest("Custom folder path is required.");
+                        }
+
+                        using (HttpClient client = new HttpClient())
+                        {
+                            HttpResponseMessage response = await client.GetAsync(firebaseUrl);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                Stream imageStream = await response.Content.ReadAsStreamAsync();
+                                string fileName = Guid.NewGuid().ToString() + ".jpg"; // Generate a unique filename
+                                string filePath = Path.Combine(customFolderPath, fileName);
+
+                                using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+                                {
+                                    await imageStream.CopyToAsync(fileStream);
+                                }
+
+                                return Ok("Image downloaded successfully to " + filePath);
+                            }
+                            else
+                            {
+                                return NotFound("Image not found");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(500, "An error occurred: " + ex.Message);
+                    }
+                }*/
+
+        [HttpPost]
+        [Route("download")]
+        public async Task<IActionResult> DownloadImage([FromBody] DownloadRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.FirebaseUrl) || string.IsNullOrEmpty(request.CustomFolderPath))
+                {
+                    return BadRequest("Firebase URL and custom folder path are required.");
+                }
+
+                using (HttpClient client = new HttpClient())
+                {
+                    HttpResponseMessage response = await client.GetAsync(request.FirebaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Stream imageStream = await response.Content.ReadAsStreamAsync();
+                        string fileName = Guid.NewGuid().ToString() + ".jpg"; // Generate a unique filename
+                        string filePath = Path.Combine(request.CustomFolderPath, fileName);
+
+                        using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await imageStream.CopyToAsync(fileStream);
+                        }
+
+                        return Ok("Image downloaded successfully to " + filePath);
+                    }
+                    else
+                    {
+                        return NotFound("Image not found");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred: " + ex.Message);
+            }
         }
     }
 }
+
+
