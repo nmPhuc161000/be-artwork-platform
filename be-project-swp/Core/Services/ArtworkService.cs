@@ -391,5 +391,35 @@ namespace be_artwork_sharing_platform.Core.Services
             _context.RemoveRange(artworksToDelete);
             return _context.SaveChanges();
         }
+
+        public async Task DownloadImageFromFirebase(string url, string filePath)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        using (Stream imageStream = await response.Content.ReadAsStreamAsync())
+                        {
+                            using (FileStream fileStream = File.Create(filePath))
+                            {
+                                await imageStream.CopyToAsync(fileStream);
+                            }
+                        }
+                        Console.WriteLine("Downloaded successfully as " + filePath);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to download image");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("An error occurred: " + ex.Message);
+                }
+            }
+        }
     }
 }

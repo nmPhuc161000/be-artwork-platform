@@ -16,6 +16,7 @@ namespace be_artwork_sharing_platform.Controllers
         private readonly IAuthService _authService;
         private readonly ILogService _logService;
         private readonly IMapper _mapper;
+        private const string ImageFolderPath = @"C:\image\";
 
         public ArtworkController(IArtworkService artworkService, IAuthService authService, ILogService logService, IMapper mapper)
         {
@@ -194,6 +195,40 @@ namespace be_artwork_sharing_platform.Controllers
             catch(Exception ex) 
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("download")]
+        public async Task<IActionResult> DownloadImageFromFirebase(string firebaseUrl)
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    HttpResponseMessage response = await client.GetAsync(firebaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Stream imageStream = await response.Content.ReadAsStreamAsync();
+                        string fileName = Guid.NewGuid().ToString() + ".jpg"; // Generate a unique filename
+                        string filePath = Path.Combine(ImageFolderPath, fileName);
+
+                        using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await imageStream.CopyToAsync(fileStream);
+                        }
+
+                        return Ok("Image downloaded successfully to " + filePath);
+                    }
+                    else
+                    {
+                        return NotFound("Image not found");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred: " + ex.Message);
             }
         }
     }
