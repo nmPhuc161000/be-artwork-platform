@@ -15,13 +15,13 @@ namespace be_project_swp.Migrations
                 name: "categories",
                 columns: table => new
                 {
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1")
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_categories", x => x.Name);
+                    table.PrimaryKey("PK_categories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -159,7 +159,7 @@ namespace be_project_swp.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Category_Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Category_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Nick_Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Url_Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -169,16 +169,17 @@ namespace be_project_swp.Migrations
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     ReasonRefuse = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category_Id = table.Column<long>(type: "bigint", nullable: false),
                     User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_artworks", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_artworks_categories_Category_Name",
-                        column: x => x.Category_Name,
+                        name: "FK_artworks_categories_Category_Id",
+                        column: x => x.Category_Id,
                         principalTable: "categories",
-                        principalColumn: "Name",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_artworks_users_User_Id",
@@ -355,13 +356,14 @@ namespace be_project_swp.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Payment_Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Payment_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Artwork_Id = table.Column<long>(type: "bigint", nullable: false),
                     NickName_Buyer = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NickName_Seller = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<double>(type: "float", nullable: false),
-                    PaymentId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    ArtworkId = table.Column<long>(type: "bigint", nullable: false),
+                    Url_Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name_Artwork = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category_Artwork = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -371,16 +373,17 @@ namespace be_project_swp.Migrations
                 {
                     table.PrimaryKey("PK_orders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_orders_artworks_ArtworkId",
-                        column: x => x.ArtworkId,
+                        name: "FK_orders_artworks_Artwork_Id",
+                        column: x => x.Artwork_Id,
                         principalTable: "artworks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_orders_payments_PaymentId",
-                        column: x => x.PaymentId,
+                        name: "FK_orders_payments_Payment_Id",
+                        column: x => x.Payment_Id,
                         principalTable: "payments",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_orders_users_User_Id",
                         column: x => x.User_Id,
@@ -389,9 +392,9 @@ namespace be_project_swp.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_artworks_Category_Name",
+                name: "IX_artworks_Category_Id",
                 table: "artworks",
-                column: "Category_Name");
+                column: "Category_Id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_artworks_User_Id",
@@ -409,14 +412,15 @@ namespace be_project_swp.Migrations
                 column: "User_Id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_orders_ArtworkId",
+                name: "IX_orders_Artwork_Id",
                 table: "orders",
-                column: "ArtworkId");
+                column: "Artwork_Id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_orders_PaymentId",
+                name: "IX_orders_Payment_Id",
                 table: "orders",
-                column: "PaymentId");
+                column: "Payment_Id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_orders_User_Id",

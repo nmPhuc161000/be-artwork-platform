@@ -18,12 +18,15 @@ namespace be_artwork_sharing_platform.Core.Entities
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public bool IsActive { get; set; } = false;
         public bool IsDeleted { get; set; } = false;
+        public bool IsPayment { get; set; } = false;
+        public string Owner { get; set; } = string.Empty;
         public string ReasonRefuse { get; set; } = "Đang được xử lí";
+        public long Category_Id { get; set; }
 
         //Relationship
         public string User_Id { get; set; }
         public ApplicationUser User { get; set; }
-        [ForeignKey("Category_Name")]
+        [ForeignKey("Category_Id")]
         public Category Category { get; set; }
         public List<Favourite> Favourites { get; set; }
         public List<Payment> Payments { get; set; }

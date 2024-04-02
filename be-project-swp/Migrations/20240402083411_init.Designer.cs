@@ -12,8 +12,8 @@ using be_artwork_sharing_platform.Core.DbContext;
 namespace be_project_swp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240329061554_update-order")]
-    partial class updateorder
+    [Migration("20240402083411_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -252,9 +252,12 @@ namespace be_project_swp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("Category_Id")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Category_Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -297,7 +300,7 @@ namespace be_project_swp.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Category_Name");
+                    b.HasIndex("Category_Id");
 
                     b.HasIndex("User_Id");
 
@@ -306,16 +309,17 @@ namespace be_project_swp.Migrations
 
             modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.Category", b =>
                 {
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.HasKey("Name");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
 
                     b.ToTable("categories");
                 });
@@ -455,6 +459,10 @@ namespace be_project_swp.Migrations
                     b.Property<long>("Artwork_Id")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("Category_Artwork")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -463,6 +471,10 @@ namespace be_project_swp.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Name_Artwork")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NickName_Buyer")
                         .IsRequired()
@@ -665,7 +677,7 @@ namespace be_project_swp.Migrations
                 {
                     b.HasOne("be_artwork_sharing_platform.Core.Entities.Category", "Category")
                         .WithMany("Artworks")
-                        .HasForeignKey("Category_Name")
+                        .HasForeignKey("Category_Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

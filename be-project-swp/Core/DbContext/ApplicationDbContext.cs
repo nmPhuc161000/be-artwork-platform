@@ -77,8 +77,13 @@ namespace be_artwork_sharing_platform.Core.DbContext
                 .WithMany(u => u.Artworks)
                 .HasForeignKey(a => a.User_Id);
 
+            builder.Entity<Artwork>()
+                .HasOne(a => a.Category)
+                .WithMany(u => u.Artworks)
+                .HasForeignKey(a => a.Category_Id);
+/*
             builder.Entity<Category>()
-                .HasKey(c => c.Name);
+                .HasKey(c => c.Name);*/
 
             builder.Entity<Favourite>()
                 .HasOne(f => f.User)

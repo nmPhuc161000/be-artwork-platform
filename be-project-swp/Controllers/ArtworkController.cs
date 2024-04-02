@@ -18,7 +18,7 @@ namespace be_artwork_sharing_platform.Controllers
         private readonly ILogService _logService;
         private readonly IMapper _mapper;
         private readonly IHttpClientFactory _clientFactory;
-        private const string ImageFolderPath = @"C:\image\";
+        private readonly string ImageFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
 
         public ArtworkController(IArtworkService artworkService, IAuthService authService, ILogService logService, IMapper mapper, IHttpClientFactory clientFactory)
         {

@@ -228,7 +228,7 @@ namespace be_artwork_sharing_platform.Core.Services
 
         public async Task<GeneralServiceResponseDto> CreateArtwork(CreateArtwork artworkDto, string user_Id, string user_Name)
         {
-            var category = _context.Categories.Find(artworkDto.Category_Name);
+            var category = _context.Categories.FirstOrDefault(c => c.Name == artworkDto.Category_Name);
             if(category is null)
             {
                 return new GeneralServiceResponseDto()
@@ -247,7 +247,12 @@ namespace be_artwork_sharing_platform.Core.Services
                 Description = artworkDto.Description,
                 Price = artworkDto.Price,
                 Url_Image = artworkDto.Url_Image,
+                Category_Id = category.Id,
             };
+            if(artwork.Price == 0)
+            {
+                artwork.IsPayment = true;
+            }
             await _context.Artworks.AddAsync(artwork);
             await _context.SaveChangesAsync();
             return new GeneralServiceResponseDto()

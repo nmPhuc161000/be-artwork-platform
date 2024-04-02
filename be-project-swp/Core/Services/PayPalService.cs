@@ -132,6 +132,8 @@ namespace be_project_swp.Core.Services
                     _context.Payments.Add(payment);
                     _context.SaveChanges();
                     var artwork = _context.Artworks.FirstOrDefault(a => a.Id == artwork_Id);
+                    artwork.IsPayment = true;
+                    artwork.Owner = nickName;
                     var user = _context.Users.FirstOrDefault(u => u.Id == user_Id);
                     var order = new Order()
                     {
