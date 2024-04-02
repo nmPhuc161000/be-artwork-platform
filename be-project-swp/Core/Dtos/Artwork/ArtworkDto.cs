@@ -16,6 +16,8 @@ public class ArtworkDto
     public DateTime UpdatedAt { get; set; }
     public bool IsActive { get; set; }
     public bool IsDeleted { get; set; }
+    public string Owner { get; set; }
+    public bool IsPayment { get; set; }
 }
 
 public class GetArtworkByUserId
@@ -33,5 +35,7 @@ public class GetArtworkByUserId
     public bool IsActive { get; set; }
     public bool IsDeleted { get; set; }
     public string ReasonRefuse { get; set; } = "Processing";
+    public string Owner { get; set; }
+    public bool IsPayment { get; set; }
 }
 

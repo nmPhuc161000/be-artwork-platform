@@ -14,5 +14,7 @@
         public DateTime UpdatedAt { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
+        public bool IsPayment { get; set; }
+        public string Owner { get; set; }
     }
 }
