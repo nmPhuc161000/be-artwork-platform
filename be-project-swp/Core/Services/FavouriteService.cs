@@ -38,6 +38,8 @@ namespace be_artwork_sharing_platform.Core.Services
                         UpdatedAt = f.Artworks.UpdatedAt,
                         IsActive = f.Artworks.IsActive,
                         IsDeleted = f.Artworks.IsDeleted,
+                        IsPayment = f.Artworks.IsPayment,
+                        Owner = f.Artworks.Owner
                     }).ToList();
                 return favourites;
             }

@@ -40,6 +40,8 @@ namespace be_artwork_sharing_platform.Core.Services
                     UpdatedAt = a.UpdatedAt,
                     IsActive = a.IsActive,
                     IsDeleted = a.IsDeleted,
+                    Owner = a.Owner,
+                    IsPayment = a.IsPayment
                 }).ToListAsync();
             return artworks;
         }
@@ -144,8 +146,9 @@ namespace be_artwork_sharing_platform.Core.Services
                     UpdatedAt = a.UpdatedAt,
                     IsActive = a.IsActive,
                     IsDeleted = a.IsDeleted,
-                    ReasonRefuse = a.ReasonRefuse
-
+                    ReasonRefuse = a.ReasonRefuse,
+                    Owner = a.Owner,
+                    IsPayment = a.IsPayment,
                 }).ToList()
                 .OrderBy(a => a.CreatedAt);
                 return artworks;
@@ -198,7 +201,8 @@ namespace be_artwork_sharing_platform.Core.Services
                     CreatedAt = artwork.CreatedAt,
                     UpdatedAt = artwork.UpdatedAt,
                     IsActive = artwork.IsActive,
-                    IsDeleted = artwork.IsDeleted
+                    IsDeleted = artwork.IsDeleted,
+                    Owner = artwork.Owner
                 };
                 return artworkDto;
             }
@@ -222,6 +226,8 @@ namespace be_artwork_sharing_platform.Core.Services
                     UpdatedAt = a.UpdatedAt,
                     IsActive = a.IsActive,
                     IsDeleted = a.IsDeleted,
+                    Owner = a.Owner,
+                    IsPayment = a.IsPayment
                 }).ToListAsync();
             return artworks;
         }
