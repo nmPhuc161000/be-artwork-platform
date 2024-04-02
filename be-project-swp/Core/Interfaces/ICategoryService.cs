@@ -1,4 +1,6 @@
-﻿using be_artwork_sharing_platform.Core.Entities;
+﻿using be_artwork_sharing_platform.Core.Dtos.Category;
+using be_artwork_sharing_platform.Core.Entities;
+using be_project_swp.Core.Dtos.Response;
 
 namespace be_artwork_sharing_platform.Core.Interfaces
 {
@@ -6,7 +8,7 @@ namespace be_artwork_sharing_platform.Core.Interfaces
     {
         IEnumerable<Category> GetAll();
         Category GetById(long id);
-        int CreateCategory(Category category);
+        Task<GeneralServiceResponseDto> CreateCategory(CreateCategory category);
         int Delete(long id);
         Task<IEnumerable<string>> GetCategortNameListAsync();
     }

@@ -5,21 +5,21 @@
 namespace be_project_swp.Migrations
 {
     /// <inheritdoc />
-    public partial class add : Migration
+    public partial class initupdate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Category_Artwork",
-                table: "orders",
-                type: "nvarchar(max)",
+            migrationBuilder.AddColumn<bool>(
+                name: "IsPayment",
+                table: "artworks",
+                type: "bit",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: false);
 
             migrationBuilder.AddColumn<string>(
-                name: "Name_Artwork",
-                table: "orders",
+                name: "Owner",
+                table: "artworks",
                 type: "nvarchar(max)",
                 nullable: false,
                 defaultValue: "");
@@ -29,12 +29,12 @@ namespace be_project_swp.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Category_Artwork",
-                table: "orders");
+                name: "IsPayment",
+                table: "artworks");
 
             migrationBuilder.DropColumn(
-                name: "Name_Artwork",
-                table: "orders");
+                name: "Owner",
+                table: "artworks");
         }
     }
 }

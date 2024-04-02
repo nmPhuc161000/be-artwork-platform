@@ -56,36 +56,14 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpPost]
         [Route("create")]
         [Authorize(Roles = StaticUserRole.ADMIN)]
-        public IActionResult CreateCategory([FromBody] CreateCategory category)
+        public async Task<ActionResult<GeneralServiceResponseDto>> CreateCategory([FromBody] CreateCategory category)
         {
             try
             {
                 string userName = HttpContext.User.Identity.Name;
-                var result = _categoryService.CreateCategory(new Category
-                {
-                    Name = category.Name,
-                });
-
-                if(result > 0)
-                {
-                    _logService.SaveNewLog(userName, "Create New Category");
-                    return Ok(new GeneralServiceResponseDto
-                    {
-                        IsSucceed = true,
-                        StatusCode = 204,
-                        Message = "Create successfully"
-                    });
-                }
-                else
-                {
-                    _logService.SaveNewLog(userName, "Create New Category Failed");
-                    return BadRequest(new GeneralServiceResponseDto
-                    {
-                        IsSucceed= false,
-                        StatusCode = 400,
-                        Message = "Create failed"
-                    });
-                }
+                var result = await _categoryService.CreateCategory(category);
+                await _logService.SaveNewLog(userName, "Create New Category");
+                return StatusCode(result.StatusCode, result.Message);
             }
             catch
             {
