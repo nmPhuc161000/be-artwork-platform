@@ -115,6 +115,11 @@ namespace be_artwork_sharing_platform.Core.DbContext
                 .WithMany(o => o.Orders)
                 .HasForeignKey(o => o.User_Id)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<RequestOrder>()
+                .HasOne(o => o.User)
+                .WithMany(o => o.RequestOrders)
+                .HasForeignKey(o => o.UserId_Sender);
         }        
     }
 }

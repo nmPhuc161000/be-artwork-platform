@@ -20,5 +20,6 @@ namespace be_artwork_sharing_platform.Core.Entities
         public List<Favourite> Favorites { get; set; }
         public List<Payment> Payments { get; set; }
         public List<Order> Orders { get; set; }
+        public List<RequestOrder> RequestOrders { get; set; }
     }
 }
