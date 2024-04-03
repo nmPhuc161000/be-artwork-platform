@@ -36,10 +36,12 @@ namespace be_project_swp.Core.Services
             var historyPayments = await _context.Orders.Where(o => o.User_Id == user_Id)
                 .Select(o => new GetPaymentHistory()
                 {
+                    Name_Artwork = o.Name_Artwork,
                     NickNme_Buyer = o.NickName_Buyer,
                     NickName_Seller = o.NickName_Seller,
                     Url_Image = o.Url_Image,
-                    Price = o.Price
+                    Price = o.Price,
+                    Purchase_Date = o.CreatedAt
                 }).ToListAsync();
             return historyPayments;
         }
@@ -49,11 +51,12 @@ namespace be_project_swp.Core.Services
             var orders = await _context.Orders.Where(o => o.NickName_Seller == nick_Name)
                 .Select(o => new GetPaymentHistory()
                 {
+                    Name_Artwork = o.Name_Artwork,
                     NickNme_Buyer = o.NickName_Buyer,
                     NickName_Seller = o.NickName_Seller,
                     Url_Image = o.Url_Image,
-                    Price = o.Price
-
+                    Price = o.Price,
+                    Purchase_Date = o.CreatedAt
                 }).ToListAsync();
             return orders;
         }

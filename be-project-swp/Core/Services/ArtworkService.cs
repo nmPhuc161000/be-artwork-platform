@@ -289,6 +289,15 @@ namespace be_artwork_sharing_platform.Core.Services
                 {
                     if(checkUser != null)
                     {
+                        if(artwork.Owner != "")
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 400,
+                                Message = $"Delete Artwork Failed because this Artwork is already owned by {artwork.Owner}"
+                            };
+                        }
                         _context.Remove(artwork);
                         _context.SaveChanges();
                         return new GeneralServiceResponseDto()
@@ -319,11 +328,11 @@ namespace be_artwork_sharing_platform.Core.Services
         {
             try
             {
-                var category = _context.Categories.Find(updateArtwork.Category_Name);
-                var artwork = _context.Artworks.FirstOrDefault(a => a.Id == id);
+                var category = await _context.Categories.FirstOrDefaultAsync(c => c.Name == updateArtwork.Category_Name);
+                var artwork = await _context.Artworks.FirstOrDefaultAsync(a => a.Id == id);
                 if (artwork is not null)
                 {
-                    var checkUser = _context.Artworks.FirstOrDefault(a => a.User_Id == user_Id && a.Id == id);
+                    var checkUser = await _context.Artworks.FirstOrDefaultAsync(a => a.User_Id == user_Id && a.Id == id);
                     if(checkUser is null)
                     {
                         return new GeneralServiceResponseDto()
@@ -344,21 +353,36 @@ namespace be_artwork_sharing_platform.Core.Services
                                 Message = "Category not found"
                             };
                         }
-                        artwork.Name = updateArtwork.Name;
-                        artwork.Category_Name = updateArtwork.Category_Name;
-                        artwork.Description = updateArtwork.Description;
-                        artwork.Url_Image = updateArtwork.Url_Image;
-                        artwork.Price = updateArtwork.Price;
-                        artwork.IsActive = false;
-                        artwork.ReasonRefuse = "Processing";
-                        _context.Update(artwork);
-                        _context.SaveChanges();
-                        return new GeneralServiceResponseDto()
+                        else
                         {
-                            IsSucceed = true,
-                            StatusCode = 200,
-                            Message = "Update Artwork Successfully"
-                        };
+                            if(artwork.Owner == "")
+                            {
+                                artwork.Name = updateArtwork.Name;
+                                artwork.Category_Name = updateArtwork.Category_Name;
+                                artwork.Description = updateArtwork.Description;
+                                artwork.Url_Image = updateArtwork.Url_Image;
+                                artwork.Price = updateArtwork.Price;
+                                artwork.IsActive = false;
+                                artwork.ReasonRefuse = "Processing";
+                                _context.Update(artwork);
+                                _context.SaveChanges();
+                                return new GeneralServiceResponseDto()
+                                {
+                                    IsSucceed = true,
+                                    StatusCode = 200,
+                                    Message = "Update Artwork Successfully"
+                                };
+                            }
+                            else
+                            {
+                                return new GeneralServiceResponseDto()
+                                {
+                                    IsSucceed = false,
+                                    StatusCode = 400,
+                                    Message = $"You cannot update this artwork because it is already owned by {artwork.Owner}"
+                                };
+                            }
+                        }  
                     }
                 }
                 else if (artwork is null)
@@ -405,6 +429,7 @@ namespace be_artwork_sharing_platform.Core.Services
             return _context.SaveChanges();
         }
 
+        //Tham khảo ChatGPT
         public async Task DownloadImage(string firebaseUrl, string customFolderPath)
         {
             var request = new DownloadRequest

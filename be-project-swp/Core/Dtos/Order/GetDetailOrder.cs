@@ -14,10 +14,12 @@ public class GetResultAfterPayment
 
 public class GetPaymentHistory
 {
+    public string Name_Artwork { get; set; }
     public string NickNme_Buyer { get; set; }
     public string NickName_Seller { get; set; }
     public string Url_Image { get; set; }
     public double Price { get; set; }
+    public DateTime Purchase_Date { get; set; }
 }
 
 public class GetBillForAdmin

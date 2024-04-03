@@ -72,6 +72,9 @@ namespace be_artwork_sharing_platform.Core.DbContext
             builder.Entity<Category>()
                 .Property(e => e.Id).ValueGeneratedOnAdd();
 
+
+            //Artwork
+
             builder.Entity<Artwork>()
                 .HasOne(a => a.User)
                 .WithMany(u => u.Artworks)
@@ -81,9 +84,6 @@ namespace be_artwork_sharing_platform.Core.DbContext
                 .HasOne(a => a.Category)
                 .WithMany(u => u.Artworks)
                 .HasForeignKey(a => a.Category_Id);
-/*
-            builder.Entity<Category>()
-                .HasKey(c => c.Name);*/
 
             builder.Entity<Favourite>()
                 .HasOne(f => f.User)
