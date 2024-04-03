@@ -118,5 +118,21 @@ namespace be_project_swp.Controllers
                 return BadRequest("Update Status User Failed");
             }
         }
+
+        [HttpGet]
+        [Route("get-creator-list")]
+        [Authorize(Roles = StaticUserRole.ADMIN)]
+        public async Task<ActionResult<UserInfoResult>> GetCreatorList()
+        {
+            try
+            {
+                var result = await _userService.GetCreatorUserListAsync();
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
