@@ -39,14 +39,13 @@ namespace be_artwork_sharing_platform.Core.Services
             return requestDto;
         }
 
-        public async Task SendRequesrOrder(SendRequest sendRequest, string userName_Request, string userId_Receivier, string fullName_Sender, string fullName_Receivier)
+        public async Task SendRequesrOrder(SendRequest sendRequest, string userId_Sender, string nickName_Sender, string nickName_Receivier)
         {
             var request = new RequestOrder
             {
-                NickName_Sender = fullName_Sender,
-                NickName_Receivier = fullName_Receivier,
-                UserName_Sender = userName_Request,
-                UserId_Receivier = userId_Receivier,
+                NickName_Sender = nickName_Sender,
+                NickName_Receivier = nickName_Receivier,
+                UserId_Sender = userId_Sender,
                 Email = sendRequest.Email,
                 PhoneNumber = sendRequest.PhoneNumber,
                 Text = sendRequest.Text
@@ -55,9 +54,9 @@ namespace be_artwork_sharing_platform.Core.Services
             await _context.SaveChangesAsync();
         }
 
-        public IEnumerable<ReceiveRequestDto> GetMineOrderByUserId(string user_Id)
+        public IEnumerable<ReceiveRequestDto> GetMineOrderByNickName(string nickName)
         {
-            var receivier = _context.RequestOrders.Where(f => f.UserId_Receivier == user_Id)
+            var receivier = _context.RequestOrders.Where(f => f.NickName_Receivier == nickName)
                 .Select(f => new ReceiveRequestDto
                 {
                     Id =f.Id,
@@ -73,9 +72,9 @@ namespace be_artwork_sharing_platform.Core.Services
             return receivier;
         }
 
-        public IEnumerable<RequestOrderDto> GetMineRequestByUserName(string user_Name)
+        public IEnumerable<RequestOrderDto> GetMineRequestByNickName(string nickName)
         {
-            var request = _context.RequestOrders.Where(f => f.UserName_Sender == user_Name)
+            var request = _context.RequestOrders.Where(f => f.NickName_Sender == nickName)
                 .Select(f => new RequestOrderDto
                 {
                     Id = f.Id,
@@ -94,7 +93,7 @@ namespace be_artwork_sharing_platform.Core.Services
 
         public async Task UpdateRquest(long id, UpdateRequest updateRequest, string user_Id)
         {
-            var request = await _context.RequestOrders.FirstOrDefaultAsync(f => f.Id == id && f.UserId_Receivier == user_Id);
+            var request = await _context.RequestOrders.FirstOrDefaultAsync(f => f.Id == id && f.UserId_Sender == user_Id);
             if(request is not null)
             {
                 request.IsActive = updateRequest.IsActive;
@@ -105,7 +104,7 @@ namespace be_artwork_sharing_platform.Core.Services
 
         public async Task CancelRequestByReceivier(long id, CancelRequest cancelRequest, string user_Id)
         {
-            var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.UserId_Receivier == user_Id);
+            var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.UserId_Sender == user_Id);
             if(request is not null)
             {
                 request.IsDeleted = cancelRequest.IsDelete;
@@ -116,7 +115,7 @@ namespace be_artwork_sharing_platform.Core.Services
 
         public async Task UpdateStatusRequest(long id, string user_Id, UpdateStatusRequest updateStatusRequest)
         {
-            var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.UserId_Receivier == user_Id);
+            var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.UserId_Sender == user_Id);
             if (request is not null)
             {
                 request.StatusRequest = updateStatusRequest.StatusRequest;
@@ -125,21 +124,25 @@ namespace be_artwork_sharing_platform.Core.Services
             await _context.SaveChangesAsync();
         }
 
-        public StatusRequest GetStatusRequestByUserNameRequest(long id, string userName)
+        public StatusRequest GetStatusRequestByUserNameRequest(long id, string userId)
         {
-            var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id && r.UserName_Sender == userName);
+            var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id && r.UserId_Sender == userId);
             return checkStatusRequest.StatusRequest;
         }
 
-        public bool GetActiveRequestByUserNameRequest(long id, string userName)
+        public async Task<bool> GetActiveRequestByUserNameRequest(long id, string userId)
         {
-            var checkStatusRequest = _context.RequestOrders.FirstOrDefault(r => r.Id == id && r.UserName_Sender == userName);
-            return checkStatusRequest.IsActive;
+            var checkStatusRequest = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.UserId_Sender == userId);
+            if(checkStatusRequest is not null)
+            {
+                return checkStatusRequest.IsActive;
+            }
+            return false;
         }
 
-        public int DeleteRequestBySender(long id, string user_Name)
+        public int DeleteRequestBySender(long id, string userId)
         {
-            var request = _context.RequestOrders.FirstOrDefault(o => o.Id == id && o.UserName_Sender == user_Name);
+            var request = _context.RequestOrders.FirstOrDefault(o => o.Id == id && o.UserId_Sender == userId);
             if (request is not null)
             {
                 _context.Remove(request);

@@ -10,11 +10,13 @@ namespace be_artwork_sharing_platform.Core.Entities
     {
         public string NickName_Sender { get; set; }
         public string NickName_Receivier { get; set; }
-        public string UserName_Sender { get; set; }
-        public string UserId_Receivier { get; set; }
+        public string UserId_Sender { get; set; }
         public string Text {  get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public StatusRequest StatusRequest { get; set; } = StatusRequest.Waiting;
+
+        //Relationship
+        public ApplicationUser User { get; set; }
     }
 }

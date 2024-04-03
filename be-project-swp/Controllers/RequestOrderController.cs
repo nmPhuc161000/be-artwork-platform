@@ -44,16 +44,14 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpPost]
         [Route("send-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> SendRequestOrder(SendRequest sendRequest, string user_Id)
+        public async Task<IActionResult> SendRequestOrder(SendRequest sendRequest, string nick_Name)
         {
             try
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                string fullNameResquest = await _authService.GetCurrentNickName(userName);
-                string currentUserNameRequest = await _authService.GetCurrentUserName(userName);
-                string fullNameReceivier = await _authService.GetCurrentFullNameByUserId(user_Id);
-                if(userId == user_Id)
+                string nickNameResquest = await _authService.GetCurrentNickName(userName);
+                if(nickNameResquest == nick_Name)
                 {
                     return BadRequest(new GeneralServiceResponseDto()
                     {
@@ -65,7 +63,7 @@ namespace be_artwork_sharing_platform.Controllers
                 else
                 {
                     await _logService.SaveNewLog(userId, "Send Request Order");
-                    await _requestOrderService.SendRequesrOrder(sendRequest, currentUserNameRequest, user_Id, fullNameResquest, fullNameReceivier);
+                    await _requestOrderService.SendRequesrOrder(sendRequest, userId, nickNameResquest, nick_Name);
                     return Ok(new GeneralServiceResponseDto()
                     {
                         IsSucceed = true,
@@ -88,7 +86,8 @@ namespace be_artwork_sharing_platform.Controllers
             try
             {
                 string userName = HttpContext.User.Identity.Name;
-                var result = _requestOrderService.GetMineRequestByUserName(userName);
+                string nickName = await _authService.GetCurrentNickName(userName);
+                var result = _requestOrderService.GetMineRequestByNickName(nickName);
                 return Ok(result);
             }
             catch
@@ -105,8 +104,8 @@ namespace be_artwork_sharing_platform.Controllers
             try
             {
                 string userName = HttpContext.User.Identity.Name;
-                string userId = await _authService.GetCurrentUserId(userName);
-                var result = _requestOrderService.GetMineOrderByUserId(userId);
+                string nickName = await _authService.GetCurrentNickName(userName);
+                var result = _requestOrderService.GetMineOrderByNickName(nickName);
                 return Ok(result);
             }
             catch
@@ -183,15 +182,14 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                var checkStatusRequest = _requestOrderService.GetStatusRequestByUserNameRequest(id, userName);
-                bool checkActiveRequest = _requestOrderService.GetActiveRequestByUserNameRequest(id, userName);
+                bool checkActiveRequest = await _requestOrderService.GetActiveRequestByUserNameRequest(id, userId);
                 if(checkActiveRequest)
                 {
                     return BadRequest("Your request has been confirmed by the receiver or is in progress so do not delete this request!!!!!");
                 }
                 else
                 {
-                    var result = _requestOrderService.DeleteRequestBySender(id, userName);
+                    var result = _requestOrderService.DeleteRequestBySender(id, userId);
                     if (result == 0) return NotFound("Request Not Found");
                     await _logService.SaveNewLog(userId, "Delete Request");
                     return Ok("Delete Request Successfully");
