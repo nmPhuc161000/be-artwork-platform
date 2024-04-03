@@ -202,7 +202,8 @@ namespace be_artwork_sharing_platform.Core.Services
                     UpdatedAt = artwork.UpdatedAt,
                     IsActive = artwork.IsActive,
                     IsDeleted = artwork.IsDeleted,
-                    Owner = artwork.Owner
+                    Owner = artwork.Owner,
+                    IsPayment = artwork.IsPayment
                 };
                 return artworkDto;
             }
