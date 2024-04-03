@@ -9,6 +9,7 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         Task<RequestOrderDto> GetRequestById(long id);
         Task SendRequesrOrder(SendRequest sendRequest, string userId_Sender, string nickName_Sender, string nickName_Receivier);
         IEnumerable<RequestOrderDto> GetMineRequestByNickName(string nickName);
+        Task<RequestOrderDto> GetMineRequestById(long id, string userId);
         IEnumerable<ReceiveRequestDto> GetMineOrderByNickName(string nickName);
         Task UpdateRquest(long id, UpdateRequest updateRequest, string user_Id);
         Task CancelRequestByReceivier(long id, CancelRequest cancelRequest, string user_Id);

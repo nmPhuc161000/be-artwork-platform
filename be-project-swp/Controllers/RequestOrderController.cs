@@ -97,6 +97,28 @@ namespace be_artwork_sharing_platform.Controllers
         }
 
         [HttpGet]
+        [Route("get-mine-request-by-id")]
+        [Authorize(Roles = StaticUserRole.CREATOR)]
+        public async Task<IActionResult> GetRequestOfMinesById(long id)
+        {
+            try
+            {
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                var result = await _requestOrderService.GetMineRequestById(id, userId);
+                if(result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch
+            {
+                return BadRequest("Something wrong");
+            }
+        }
+
+        [HttpGet]
         [Route("get-mine-order")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
         public async Task<IActionResult> GetOrderOfMines()

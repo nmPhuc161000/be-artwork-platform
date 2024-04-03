@@ -91,6 +91,29 @@ namespace be_artwork_sharing_platform.Core.Services
             return request;
         }
 
+        public async Task<RequestOrderDto> GetMineRequestById(long id, string userId)
+        {
+            var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.UserId_Sender == userId);
+            if(request != null)
+            {
+                var requestDto = new RequestOrderDto()
+                {
+                    Id = request.Id,
+                    NickName_Sender = request.NickName_Sender,
+                    NickName_Receivier = request.NickName_Receivier,
+                    Email = request.Email,
+                    PhoneNumber = request.PhoneNumber,
+                    Text = request.Text,
+                    CreatedAt = request.CreatedAt,
+                    StatusRequest = request.StatusRequest,
+                    IsActive = request.IsActive,
+                    IsDeleted = request.IsDeleted,
+                };
+                return requestDto;
+            }
+            return null;
+        }
+
         public async Task UpdateRquest(long id, UpdateRequest updateRequest, string user_Id)
         {
             var request = await _context.RequestOrders.FirstOrDefaultAsync(f => f.Id == id && f.UserId_Sender == user_Id);
