@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Mail;
 using System.Net;
 using be_project_swp.Core.Dtos.Response;
+using be_artwork_sharing_platform.Core.Constancs;
 
 namespace be_artwork_sharing_platform.Core.Services
 {
@@ -103,19 +104,32 @@ namespace be_artwork_sharing_platform.Core.Services
             _context.SaveChanges();
         }
 
+        public async Task<IEnumerable<UserInfoResult>> GetCreatorUserListAsync()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            List<UserInfoResult> creatorUsers = new List<UserInfoResult>();
+
+            foreach (var user in users)
+            {
+                var userInfo = GeneralUserInfoObject(user);
+                if (userInfo != null) // Only add if user is a "CREATOR"
+                {
+                    creatorUsers.Add(userInfo);
+                }
+            }
+            return creatorUsers;
+        }
+
         public async Task<IEnumerable<UserInfoResult>> GetUserListAsync()
         {
             var users = await _userManager.Users.ToListAsync();
-
             List<UserInfoResult> userInfoResults = new List<UserInfoResult>();
 
             foreach (var user in users)
             {
-                var roles = await _userManager.GetRolesAsync(user);
-                var userInfo = GeneralUserInfoObject(user, roles);
+                var userInfo = GeneralUserInfoObject(user);
                 userInfoResults.Add(userInfo);
             }
-
             return userInfoResults;
         }
         public async Task<UserInfoResult?> GetUserDetailsByUserNameAsyncs(string userName)
@@ -123,8 +137,7 @@ namespace be_artwork_sharing_platform.Core.Services
             var user = await _userManager.FindByNameAsync(userName);
             if (user is null) return null;
 
-            var roles = await _userManager.GetRolesAsync(user);
-            var userInfo = GeneralUserInfoObject(user, roles);
+            var userInfo = GeneralUserInfoObject(user);
             return userInfo;
         }
 
@@ -137,20 +150,28 @@ namespace be_artwork_sharing_platform.Core.Services
         }
 
         //GeneralUserInfoObject
-        private UserInfoResult GeneralUserInfoObject(ApplicationUser user, IList<string> roles)
+        private UserInfoResult GeneralUserInfoObject(ApplicationUser user)
         {
-            // Instead of this, You can use Automapper packages. But i don't want it in this project
-            return new UserInfoResult()
+            var roles = _userManager.GetRolesAsync(user).Result;
+            // Check if user has "CREATOR" role
+            if (roles.Contains(StaticUserRole.CREATOR))
             {
-                Id = user.Id,
-                NickName = user.NickName,
-                UserName = user.UserName,
-                Email = user.Email,
-                Address = user.Address,
-                PhoneNumber = user.PhoneNumber,
-                CreatedAt = user.CreatedAt,
-                Roles = roles
-            };
+                return new UserInfoResult()
+                {
+                    Id = user.Id,
+                    NickName = user.NickName,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Address = user.Address,
+                    CreatedAt = user.CreatedAt,
+                    Roles = roles
+                };
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
