@@ -126,8 +126,20 @@ namespace be_project_swp.Controllers
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
                 string nickName = await _authService.GetCurrentNickName(userName);
-                var orderResponse = await _payPalService.CreateOrder(userId, artwork_Id, nickName);
-                return Ok(orderResponse);
+                var artwork = await _context.Artworks.FirstOrDefaultAsync(a => a.Id == artwork_Id);
+                if(artwork != null)
+                {
+                    if(artwork.User_Id == userId)
+                    {
+                        return BadRequest("You can not buy your artwork");
+                    }
+                    var orderResponse = await _payPalService.CreateOrder(userId, artwork_Id, nickName);
+                    return Ok(orderResponse);
+                }
+                else
+                {
+                    return NotFound("Artwork not found");
+                }
             }
             catch (Exception ex)
             {

@@ -201,7 +201,7 @@ namespace be_artwork_sharing_platform.Controllers
             }
         }
 
-        /*[HttpGet]
+        [HttpGet]
         [Route("download")]
         public async Task<IActionResult> DownloadImageFromFirebase(string firebaseUrl)
         {
@@ -233,7 +233,7 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 return StatusCode(500, "An error occurred: " + ex.Message);
             }
-        }*/
+        }
 
         /*        [HttpGet]
                 [Route("download")]
@@ -260,46 +260,46 @@ namespace be_artwork_sharing_platform.Controllers
                     }
                 }*/
 
-        /*        [HttpGet]
-                [Route("download")]
-                public async Task<IActionResult> DownloadImageFromFirebase(string firebaseUrl, string customFolderPath)
+        /*[HttpGet]
+        [Route("download")]
+        public async Task<IActionResult> DownloadImageFromFirebase(string firebaseUrl, string customFolderPath)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(customFolderPath))
                 {
-                    try
+                    return BadRequest("Custom folder path is required.");
+                }
+
+                using (HttpClient client = new HttpClient())
+                {
+                    HttpResponseMessage response = await client.GetAsync(firebaseUrl);
+                    if (response.IsSuccessStatusCode)
                     {
-                        if (string.IsNullOrEmpty(customFolderPath))
+                        Stream imageStream = await response.Content.ReadAsStreamAsync();
+                        string fileName = Guid.NewGuid().ToString() + ".jpg"; // Generate a unique filename
+                        string filePath = Path.Combine(customFolderPath, fileName);
+
+                        using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
                         {
-                            return BadRequest("Custom folder path is required.");
+                            await imageStream.CopyToAsync(fileStream);
                         }
 
-                        using (HttpClient client = new HttpClient())
-                        {
-                            HttpResponseMessage response = await client.GetAsync(firebaseUrl);
-                            if (response.IsSuccessStatusCode)
-                            {
-                                Stream imageStream = await response.Content.ReadAsStreamAsync();
-                                string fileName = Guid.NewGuid().ToString() + ".jpg"; // Generate a unique filename
-                                string filePath = Path.Combine(customFolderPath, fileName);
-
-                                using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
-                                {
-                                    await imageStream.CopyToAsync(fileStream);
-                                }
-
-                                return Ok("Image downloaded successfully to " + filePath);
-                            }
-                            else
-                            {
-                                return NotFound("Image not found");
-                            }
-                        }
+                        return Ok("Image downloaded successfully to " + filePath);
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        return StatusCode(500, "An error occurred: " + ex.Message);
+                        return NotFound("Image not found");
                     }
-                }*/
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred: " + ex.Message);
+            }
+        }*/
 
-        [HttpPost]
+        /*[HttpPost]
         [Route("download")]
         public async Task<IActionResult> DownloadImage([FromBody] DownloadRequest request)
         {
@@ -336,7 +336,7 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 return StatusCode(500, "An error occurred: " + ex.Message);
             }
-        }
+        }*/
     }
 }
 
