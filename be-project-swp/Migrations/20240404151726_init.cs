@@ -64,30 +64,6 @@ namespace be_project_swp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "requestorders",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NickName_Sender = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NickName_Receivier = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserName_Sender = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId_Receivier = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StatusRequest = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_requestorders", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "roles",
                 columns: table => new
                 {
@@ -168,6 +144,8 @@ namespace be_project_swp.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsPayment = table.Column<bool>(type: "bit", nullable: false),
+                    Owner = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ReasonRefuse = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Category_Id = table.Column<long>(type: "bigint", nullable: false),
                     User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false)
@@ -184,6 +162,40 @@ namespace be_project_swp.Migrations
                     table.ForeignKey(
                         name: "FK_artworks_users_User_Id",
                         column: x => x.User_Id,
+                        principalTable: "users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "requestorders",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    NickName_Sender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NickName_Receivier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId_Sender = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsPayment = table.Column<bool>(type: "bit", nullable: false),
+                    StatusRequest = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<double>(type: "float", nullable: false),
+                    Url_Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Text_Result = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsSendResult = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_requestorders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_requestorders_users_UserId_Sender",
+                        column: x => x.UserId_Sender,
                         principalTable: "users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -332,7 +344,8 @@ namespace be_project_swp.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Order_Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Artwork_Id = table.Column<long>(type: "bigint", nullable: false)
+                    Artwork_Id = table.Column<long>(type: "bigint", nullable: false),
+                    Request_Id = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -343,7 +356,53 @@ namespace be_project_swp.Migrations
                         principalTable: "artworks",
                         principalColumn: "Id");
                     table.ForeignKey(
+                        name: "FK_payments_requestorders_Request_Id",
+                        column: x => x.Request_Id,
+                        principalTable: "requestorders",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_payments_users_User_Id",
+                        column: x => x.User_Id,
+                        principalTable: "users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "orderdetailrequests",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    User_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Payment_Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Artwork_Id = table.Column<long>(type: "bigint", nullable: false),
+                    NickName_Request = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NickName_Receivier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<double>(type: "float", nullable: false),
+                    Url_Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_orderdetailrequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_orderdetailrequests_payments_Payment_Id",
+                        column: x => x.Payment_Id,
+                        principalTable: "payments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_orderdetailrequests_requestorders_Artwork_Id",
+                        column: x => x.Artwork_Id,
+                        principalTable: "requestorders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_orderdetailrequests_users_User_Id",
                         column: x => x.User_Id,
                         principalTable: "users",
                         principalColumn: "Id");
@@ -412,6 +471,21 @@ namespace be_project_swp.Migrations
                 column: "User_Id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_orderdetailrequests_Artwork_Id",
+                table: "orderdetailrequests",
+                column: "Artwork_Id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_orderdetailrequests_Payment_Id",
+                table: "orderdetailrequests",
+                column: "Payment_Id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_orderdetailrequests_User_Id",
+                table: "orderdetailrequests",
+                column: "User_Id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_orders_Artwork_Id",
                 table: "orders",
                 column: "Artwork_Id");
@@ -433,9 +507,19 @@ namespace be_project_swp.Migrations
                 column: "Artwork_Id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_payments_Request_Id",
+                table: "payments",
+                column: "Request_Id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_payments_User_Id",
                 table: "payments",
                 column: "User_Id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_requestorders_UserId_Sender",
+                table: "requestorders",
+                column: "UserId_Sender");
 
             migrationBuilder.CreateIndex(
                 name: "IX_resetpasswords_User_Id",
@@ -499,13 +583,13 @@ namespace be_project_swp.Migrations
                 name: "logs");
 
             migrationBuilder.DropTable(
+                name: "orderdetailrequests");
+
+            migrationBuilder.DropTable(
                 name: "orders");
 
             migrationBuilder.DropTable(
                 name: "reports");
-
-            migrationBuilder.DropTable(
-                name: "requestorders");
 
             migrationBuilder.DropTable(
                 name: "resetpasswords");
@@ -533,6 +617,9 @@ namespace be_project_swp.Migrations
 
             migrationBuilder.DropTable(
                 name: "artworks");
+
+            migrationBuilder.DropTable(
+                name: "requestorders");
 
             migrationBuilder.DropTable(
                 name: "categories");

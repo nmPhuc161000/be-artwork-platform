@@ -12,8 +12,8 @@ using be_artwork_sharing_platform.Core.DbContext;
 namespace be_project_swp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240402083411_init")]
-    partial class init
+    [Migration("20240404152034_init-update")]
+    partial class initupdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -272,11 +272,18 @@ namespace be_project_swp.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPayment")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nick_Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Owner")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -413,6 +420,12 @@ namespace be_project_swp.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPayment")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSendResult")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NickName_Receivier")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -425,6 +438,9 @@ namespace be_project_swp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
                     b.Property<int>("StatusRequest")
                         .HasColumnType("int");
 
@@ -432,18 +448,24 @@ namespace be_project_swp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Text_Result")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId_Receivier")
+                    b.Property<string>("Url_Image")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserName_Sender")
+                    b.Property<string>("UserId_Sender")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId_Sender");
 
                     b.ToTable("requestorders");
                 });
@@ -514,6 +536,67 @@ namespace be_project_swp.Migrations
                     b.ToTable("orders");
                 });
 
+            modelBuilder.Entity("be_project_swp.Core.Entities.OrderDetailRequest", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NickName_Receivier")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NickName_Request")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Payment_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<long>("Request_Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Url_Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("User_Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Payment_Id");
+
+                    b.HasIndex("Request_Id");
+
+                    b.HasIndex("User_Id");
+
+                    b.ToTable("orderdetailrequests");
+                });
+
             modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>
                 {
                     b.Property<string>("Id")
@@ -527,6 +610,9 @@ namespace be_project_swp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long>("Request_Id")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("User_Id")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -534,6 +620,8 @@ namespace be_project_swp.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Artwork_Id");
+
+                    b.HasIndex("Request_Id");
 
                     b.HasIndex("User_Id");
 
@@ -711,6 +799,17 @@ namespace be_project_swp.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.RequestOrder", b =>
+                {
+                    b.HasOne("be_artwork_sharing_platform.Core.Entities.ApplicationUser", "User")
+                        .WithMany("RequestOrders")
+                        .HasForeignKey("UserId_Sender")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("be_project_swp.Core.Entities.Order", b =>
                 {
                     b.HasOne("be_artwork_sharing_platform.Core.Entities.Artwork", "Artwork")
@@ -738,11 +837,44 @@ namespace be_project_swp.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("be_project_swp.Core.Entities.OrderDetailRequest", b =>
+                {
+                    b.HasOne("be_project_swp.Core.Entities.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("Payment_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("be_artwork_sharing_platform.Core.Entities.RequestOrder", "RequestOrder")
+                        .WithMany("OrderDetailRequests")
+                        .HasForeignKey("Request_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("be_artwork_sharing_platform.Core.Entities.ApplicationUser", "User")
+                        .WithMany("OrderDetailRequests")
+                        .HasForeignKey("User_Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+
+                    b.Navigation("RequestOrder");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>
                 {
                     b.HasOne("be_artwork_sharing_platform.Core.Entities.Artwork", "Artworks")
                         .WithMany("Payments")
                         .HasForeignKey("Artwork_Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("be_artwork_sharing_platform.Core.Entities.RequestOrder", "RequestOrders")
+                        .WithMany("Payments")
+                        .HasForeignKey("Request_Id")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -753,6 +885,8 @@ namespace be_project_swp.Migrations
                         .IsRequired();
 
                     b.Navigation("Artworks");
+
+                    b.Navigation("RequestOrders");
 
                     b.Navigation("User");
                 });
@@ -774,9 +908,13 @@ namespace be_project_swp.Migrations
 
                     b.Navigation("Favorites");
 
+                    b.Navigation("OrderDetailRequests");
+
                     b.Navigation("Orders");
 
                     b.Navigation("Payments");
+
+                    b.Navigation("RequestOrders");
                 });
 
             modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.Artwork", b =>
@@ -791,6 +929,13 @@ namespace be_project_swp.Migrations
             modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.Category", b =>
                 {
                     b.Navigation("Artworks");
+                });
+
+            modelBuilder.Entity("be_artwork_sharing_platform.Core.Entities.RequestOrder", b =>
+                {
+                    b.Navigation("OrderDetailRequests");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>

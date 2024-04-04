@@ -19,5 +19,7 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         StatusRequest GetStatusRequestByUserNameRequest(long id, string userNames);
         Task<bool> GetActiveRequestByUserNameRequest(long id, string userNames);
         Task<GeneralServiceResponseDto> SendResultRequest(SendResultRequest sendResultRequest, long id, string nickName_Receivier, string userName);
+        Task<OrderRequestAndTokenResponse> CreatePaymentForRequest(string user_Id, long request_Id);
+        Task<ResponsePayment> IsPaymentCaptured(string orderId, string user_Id, long request_Id, string nickName);
     }
 }
