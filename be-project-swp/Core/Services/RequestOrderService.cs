@@ -159,6 +159,9 @@ namespace be_artwork_sharing_platform.Core.Services
                     StatusRequest = request.StatusRequest,
                     IsActive = request.IsActive,
                     IsDeleted = request.IsDeleted,
+                    IsSendResult = request.IsSendResult,
+                    IsPayment = request.IsPayment,
+                    Text_Result = request.Text_Result,
                 };
                 return requestDto;
             }
@@ -628,7 +631,9 @@ namespace be_artwork_sharing_platform.Core.Services
                         NickName_Receivier = requesrOrder.NickName_Receivier,
                         Price = requesrOrder.Price,
                         Url_Image = requesrOrder.Url_Image,
-                        Text = requesrOrder.Text
+                        Text = requesrOrder.Text,
+                        Text_Result = requesrOrder.Text_Result,
+                        IsPayment = requesrOrder.IsPayment,
                     };
                     _context.OrderDetails.Add(orderDetailRequest);
                     _context.SaveChanges();

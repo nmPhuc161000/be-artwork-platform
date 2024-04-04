@@ -18,16 +18,14 @@ namespace be_artwork_sharing_platform.Controllers
     public class RequestOrderController : ControllerBase
     {
         private readonly IRequestOrderService _requestOrderService;
-        private readonly ILogService _logService;
         private readonly IAuthService _authService;
         private readonly ApplicationDbContext _context;
         private readonly IPayPalService _payPalService;
         private readonly HttpClient _httpClient;
 
-        public RequestOrderController(IRequestOrderService requestOrderService, ILogService logService, IAuthService authService, ApplicationDbContext context, IPayPalService payPalService, HttpClient httpClient)
+        public RequestOrderController(IRequestOrderService requestOrderService, IAuthService authService, ApplicationDbContext context, IPayPalService payPalService, HttpClient httpClient)
         {
             _requestOrderService = requestOrderService;
-            _logService = logService;
             _authService = authService;
             _context = context;
             _payPalService = payPalService;
@@ -204,7 +202,7 @@ namespace be_artwork_sharing_platform.Controllers
             }
         }
 
-        [HttpPatch]
+        [HttpPost]
         [Route("send-result-artwork")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
         public async Task<ActionResult<GeneralServiceResponseDto>> SendResultRequest(SendResultRequest sendResultRequest, long id)
