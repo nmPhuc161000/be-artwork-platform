@@ -162,6 +162,7 @@ namespace be_artwork_sharing_platform.Core.Services
                     IsSendResult = request.IsSendResult,
                     IsPayment = request.IsPayment,
                     Text_Result = request.Text_Result,
+                    Url_Image = request.Url_Image
                 };
                 return requestDto;
             }
