@@ -7,7 +7,6 @@ namespace be_artwork_sharing_platform.Core.Dtos.Auth
     {
         [Required]
         [StringLength(30)]
-        [RegularExpression(RegexConst.NICKNAME, ErrorMessage = "Nick Name must not have spaces")]
         public string NickName { get; set; }
 
         [Required(ErrorMessage = "UserName is required")]
