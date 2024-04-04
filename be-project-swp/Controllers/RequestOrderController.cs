@@ -178,27 +178,18 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpDelete]
         [Route("delete-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> DeleteRequest(long id)
+        public async Task<ActionResult<GeneralServiceResponseDto>> DeleteRequest(long id)
         {
             try
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                bool checkActiveRequest = await _requestOrderService.GetActiveRequestByUserNameRequest(id, userId);
-                if(checkActiveRequest)
-                {
-                    return BadRequest("Your request has been confirmed by the receiver or is in progress so do not delete this request!!!!!");
-                }
-                else
-                {
-                    var result = await _requestOrderService.DeleteRequestBySender(id, userId, userName);
-                    if (result == 0) return NotFound("Request Not Found");
-                    return Ok("Delete Request Successfully");
-                }
+                var result = await _requestOrderService.DeleteRequestBySender(id, userId, userName);
+                return StatusCode(result.StatusCode, result.Message);
             }
-            catch
+            catch (Exception ex)
             {
-                return BadRequest("Delete Request Failed");
+                return BadRequest(ex.Message);
             }
         }
 

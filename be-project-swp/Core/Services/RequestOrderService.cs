@@ -8,6 +8,7 @@ using be_project_swp.Core.Dtos.RequestOrder;
 using be_project_swp.Core.Dtos.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.Eventing.Reader;
 using System.Net.WebSockets;
 
 namespace be_artwork_sharing_platform.Core.Services
@@ -414,16 +415,59 @@ namespace be_artwork_sharing_platform.Core.Services
             return false;
         }
 
-        public async Task<int> DeleteRequestBySender(long id, string userId, string userName)
+        public async Task<GeneralServiceResponseDto> DeleteRequestBySender(long id, string userId, string userName)
         {
-            var request = _context.RequestOrders.FirstOrDefault(o => o.Id == id && o.UserId_Sender == userId);
-            if (request is not null)
+            try
             {
-                await _logService.SaveNewLog(userName, "Delete Request");
-                _context.Remove(request);
-                return _context.SaveChanges();
+                var request = _context.RequestOrders.FirstOrDefault(o => o.Id == id);
+                if (request is not null)
+                {
+                    if (request.UserId_Sender != userId)
+                    {
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = false,
+                            StatusCode = 400,
+                            Message = "You can not delete this request"
+                        };
+                    }
+                    else
+                    {
+                        if (request.IsActive == false)
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 400,
+                                Message = "Your request has been confirmed by the receiver or is in progress so do not delete this request!!!!!"
+                            };
+                        }
+                        else
+                        {
+                            await _logService.SaveNewLog(userName, "Delete Request");
+                            _context.Remove(request);
+                            await _context.SaveChangesAsync();
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = true,
+                                StatusCode = 200,
+                                Message = "Delete Request Successfully"
+                            };
+                        }
+                    }
+                }
+                else
+                    return new GeneralServiceResponseDto()
+                    {
+                        IsSucceed = false,
+                        StatusCode = 404,
+                        Message = "Order Request not found"
+                    };
             }
-            return 0;
+            catch(Exception ex) 
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<GeneralServiceResponseDto> SendResultRequest(SendResultRequest sendResultRequest, long id, string nickName_Receivier, string userName)
