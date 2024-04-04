@@ -44,7 +44,7 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpPost]
         [Route("send-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> SendRequestOrder(SendRequest sendRequest, string nick_Name)
+        public async Task<IActionResult> SendRequestOrder(string nick_Name, SendRequest sendRequest)
         {
             try
             {

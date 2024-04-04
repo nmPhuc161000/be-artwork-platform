@@ -8,6 +8,7 @@ using be_artwork_sharing_platform.Core.Interfaces;
 using be_artwork_sharing_platform.Core.Services;
 using be_project_swp.Core.Dtos.Artwork;
 using be_project_swp.Core.Dtos.RequestOrder;
+using be_project_swp.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -26,14 +27,16 @@ namespace be_project_swp.Controllers
         private readonly ILogService _logService;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IOrderService _orderService;
 
-        public AdminController(IArtworkService artworkService, IAuthService authService, ILogService logService, IMapper mapper, IUserService userService)
+        public AdminController(IArtworkService artworkService, IAuthService authService, ILogService logService, IMapper mapper, IUserService userService, IOrderService orderService)
         {
             _artworkService = artworkService;
             _authService = authService;
             _logService = logService;
             _mapper = mapper;
             _userService = userService;
+            _orderService = orderService;
         }
 
         [HttpGet]
@@ -130,6 +133,22 @@ namespace be_project_swp.Controllers
                 return Ok(result);
             }
             catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("get-user-revenue")]
+        [Authorize(Roles = StaticUserRole.ADMIN)]
+        public async Task<IActionResult> GetUserRevenue()
+        {
+            try
+            {
+                var result = await _orderService.GetUserRevenue();
+                return Ok(result);
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }

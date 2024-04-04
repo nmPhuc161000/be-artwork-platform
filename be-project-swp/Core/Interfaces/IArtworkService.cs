@@ -16,7 +16,7 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         Task<IEnumerable<GetArtworkByUserId>> GetArtworkByUserId(string user_Id);
         Task<GeneralServiceResponseDto> CreateArtwork(CreateArtwork artworkDto, string user_Id, string user_Name);
         Task<GeneralServiceResponseDto> Delete(long id, string user_Id);
-        int DeleteSelectedArtworks(List<long> selectedIds);
+        Task<int> DeleteSelectedArtworks(List<long> selectedIds);
 
         Task<GeneralServiceResponseDto> UpdateArtwork(long id, UpdateArtwork updateArtwork, string user_Id);
         Task AcceptArtwork(long id, AcceptArtwork acceptArtwork);

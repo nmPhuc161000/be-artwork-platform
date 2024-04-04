@@ -60,5 +60,21 @@ namespace be_project_swp.Core.Services
                 }).ToListAsync();
             return orders;
         }
+
+        public async Task<IEnumerable<GetBillForAdmin>> GetUserRevenue()
+        {
+            var orders = await _context.Orders
+                .Select(o => new GetBillForAdmin()
+                {
+                    NickNme_Buyer = o.NickName_Buyer,
+                    NickName_Seller = o.NickName_Seller,
+                    Name_Artwork = o.Name_Artwork,
+                    Url_Image = o.Url_Image,
+                    Price= o.Price,
+                })
+                .OrderBy(o =>o.NickNme_Buyer)
+                .ToListAsync();
+            return orders;
+        }
     }
 }
