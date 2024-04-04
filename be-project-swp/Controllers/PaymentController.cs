@@ -133,6 +133,11 @@ namespace be_project_swp.Controllers
                     {
                         return BadRequest("You can not buy your artwork");
                     }
+                    else if(artwork.Owner != "")
+                    {
+                        if(artwork.Owner == nickName) return BadRequest("You bought this Artwork");
+                        return BadRequest($"This Artwork of art is owned by {artwork.Owner}");
+                    }
                     var orderResponse = await _payPalService.CreateOrder(userId, artwork_Id, nickName);
                     return Ok(orderResponse);
                 }

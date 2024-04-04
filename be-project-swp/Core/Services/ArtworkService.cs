@@ -422,11 +422,21 @@ namespace be_artwork_sharing_platform.Core.Services
             return status.IsDeleted;
         }
 
-        public int DeleteSelectedArtworks(List<long> selectedIds)
+        public async Task<int> DeleteSelectedArtworks(List<long> selectedIds)
         {
-            var artworksToDelete = _context.Artworks.Where(a => selectedIds.Contains(a.Id)).ToList();
-            _context.RemoveRange(artworksToDelete);
-            return _context.SaveChanges();
+            var artworksToDelete = await _context.Artworks.Where(a => selectedIds.Contains(a.Id)).ToListAsync();
+            if (artworksToDelete.Count > 0)
+            {
+                var checkArtwork = await _context.Artworks.Where(a => a.IsPayment == true && a.Owner != "").ToListAsync();
+                if (checkArtwork.Count > 0)
+                {
+                    _context.RemoveRange(artworksToDelete);
+                    await _context.SaveChangesAsync();
+                    return 1;
+                }
+                else return -1;
+            }
+            else  return 0;
         }
 
         //Tham khảo ChatGPT

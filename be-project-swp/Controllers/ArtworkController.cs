@@ -152,10 +152,8 @@ namespace be_artwork_sharing_platform.Controllers
             try
             {
                 string userName = HttpContext.User.Identity.Name;
-
-                int deletedCount = _artworkService.DeleteSelectedArtworks(ids);
-
-                if (deletedCount > 0)
+                int deletedCount = await _artworkService.DeleteSelectedArtworks(ids);
+                if (deletedCount == 1)
                 {
                     await _logService.SaveNewLog(userName, $"Deleted {deletedCount} Artwork(s)");
                     return Ok(new GeneralServiceResponseDto
@@ -165,13 +163,22 @@ namespace be_artwork_sharing_platform.Controllers
                         Message = $"Deleted {deletedCount} Artwork(s) Successfully"
                     });
                 }
-                else
+                else if(deletedCount == 0)
                 {
                     return NotFound(new GeneralServiceResponseDto
                     {
                         IsSucceed = true,
                         StatusCode = 404,
                         Message = "No Artwork(s) Found to Delete"
+                    });
+                }
+                else
+                {
+                    return BadRequest(new GeneralServiceResponseDto
+                    {
+                        IsSucceed = false,
+                        StatusCode = 400,
+                        Message = $"Deleted Artwork Failed because Artwork sold"
                     });
                 }
             }
