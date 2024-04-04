@@ -15,6 +15,7 @@ namespace be_project_swp.Core.Entities
         public string Url_Image { get; set; }
         public bool IsPayment { get; set; }
         public string Text { get; set; }
+        public bool IsSendResult { get; set; }
         public string Text_Result { get; set; }
         public ApplicationUser User { get; set; }
         [ForeignKey("Payment_Id")]

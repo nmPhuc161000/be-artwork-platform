@@ -16,6 +16,7 @@ namespace be_artwork_sharing_platform.Core.Dtos.RequestOrder
         public bool IsSendResult { get; set; }
         public bool IsPayment { get; set; }
         public string Text_Result { get; set; }
+        public string Url_Image { get; set; }
         public StatusRequest StatusRequest { get; set; }
     }
 }
