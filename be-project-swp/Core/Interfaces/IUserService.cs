@@ -12,6 +12,6 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         Task<IEnumerable<string>> GetUsernameListAsync();
         Task<GeneralServiceResponseDto> UpdateInformation(UpdateInformation updateUser, string userId);
         void ChangePassword(ChangePassword changePassword, string userID);
-        Task UpdateUser(UpdateStatusUser updateStatusUser, string userId);
+        Task UpdateUser(UpdateStatusUser updateStatusUser, string userId, string userName);
     }
 }

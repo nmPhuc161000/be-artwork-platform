@@ -11,10 +11,12 @@ namespace be_artwork_sharing_platform.Core.Services
     public class CategoryService : ICategoryService
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogService _logService;
 
-        public CategoryService(ApplicationDbContext context)
+        public CategoryService(ApplicationDbContext context, ILogService logService)
         {
             _context = context;
+            _logService = logService;
         }
 
         public IEnumerable<Category> GetAll()
@@ -27,7 +29,7 @@ namespace be_artwork_sharing_platform.Core.Services
             return _context.Categories.Find(id) ?? throw new Exception("Category not found");
         }
 
-        public async Task<GeneralServiceResponseDto> CreateCategory(CreateCategory category)
+        public async Task<GeneralServiceResponseDto> CreateCategory(CreateCategory category, string userName)
         {
             var _category = await _context.Categories.FirstOrDefaultAsync(c => c.Name == category.Name);
             if (_category == null)
@@ -38,6 +40,7 @@ namespace be_artwork_sharing_platform.Core.Services
                 };
                 await _context.Categories.AddAsync(newCategory);
                 await _context.SaveChangesAsync();
+                await _logService.SaveNewLog(userName, "Create New Category");
                 return new GeneralServiceResponseDto()
                 {
                     IsSucceed = true,

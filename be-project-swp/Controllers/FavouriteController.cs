@@ -39,7 +39,6 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                string userNameCurrent = await _authService.GetCurrentUserName(userName);
                 Favourite favouriteDto = new Favourite();
                 var checkArtwork = _context.Artworks.FirstOrDefault(a => a.Id == artwork_Id);
                 if (checkArtwork == null)
@@ -66,7 +65,7 @@ namespace be_artwork_sharing_platform.Controllers
                     else
                     {
                         var id = await _favouriteService.AddToFavourite(userId, artwork_Id, favouriteDto.Id);
-                        await _logService.SaveNewLog(userNameCurrent, "Add Artwork to your Favourite Successfully");
+                        await _logService.SaveNewLog(userName, "Add Artwork to your Favourite");
                         return Ok(new AddFavourite()
                         {
                             IsSucceed = true,
@@ -104,7 +103,7 @@ namespace be_artwork_sharing_platform.Controllers
                 }
                 else
                 {
-                    await _logService.SaveNewLog(userName, "Remove Artwork from your Favourite Successfully");
+                    await _logService.SaveNewLog(userName, "Remove Artwork from your Favourite");
                     return Ok(new GeneralServiceResponseDto()
                     {
                         IsSucceed = true,

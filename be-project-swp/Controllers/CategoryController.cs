@@ -61,8 +61,7 @@ namespace be_artwork_sharing_platform.Controllers
             try
             {
                 string userName = HttpContext.User.Identity.Name;
-                var result = await _categoryService.CreateCategory(category);
-                await _logService.SaveNewLog(userName, "Create New Category");
+                var result = await _categoryService.CreateCategory(category, userName);
                 return StatusCode(result.StatusCode, result.Message);
             }
             catch
@@ -74,7 +73,7 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpDelete]
         [Route("delete")]
         [Authorize(Roles = StaticUserRole.ADMIN)]
-        public IActionResult DeleteCategory(long id)
+        public async Task<IActionResult> DeleteCategory(long id)
         {
             try
             {
@@ -82,7 +81,7 @@ namespace be_artwork_sharing_platform.Controllers
                 var result = _categoryService.Delete(id);
                 if(result > 0)
                 {
-                    _logService.SaveNewLog(userName, "Delete Category Successfully");
+                    await _logService.SaveNewLog(userName, "Delete Category Successfully");
                     return Ok(new GeneralServiceResponseDto
                     {
                         IsSucceed = true,

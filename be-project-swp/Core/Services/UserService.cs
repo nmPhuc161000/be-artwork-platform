@@ -15,11 +15,13 @@ namespace be_artwork_sharing_platform.Core.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
+        private readonly ILogService _logService;
 
-        public UserService(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public UserService(UserManager<ApplicationUser> userManager, ApplicationDbContext context, ILogService logService)
         {
             _userManager = userManager;
             _context = context;
+            _logService = logService;
         }
 
         public async Task<GeneralServiceResponseDto> UpdateInformation(UpdateInformation updateUser, string userId)
@@ -81,12 +83,13 @@ namespace be_artwork_sharing_platform.Core.Services
             };
         }
 
-        public async Task UpdateUser(UpdateStatusUser updateStatusUser, string userId)
+        public async Task UpdateUser(UpdateStatusUser updateStatusUser, string userId, string userName)
         {
             var user = _context.Users.FirstOrDefault(u => u.Id.Equals(userId));
 
             if (user is not null)
             {
+                await _logService.SaveNewLog(userName, "Update Status User");
                 user.IsActive = updateStatusUser.IsActive;  
             }
             _context.Update(user);

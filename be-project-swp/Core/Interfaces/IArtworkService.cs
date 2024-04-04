@@ -19,8 +19,8 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         Task<int> DeleteSelectedArtworks(List<long> selectedIds);
 
         Task<GeneralServiceResponseDto> UpdateArtwork(long id, UpdateArtwork updateArtwork, string user_Id);
-        Task AcceptArtwork(long id, AcceptArtwork acceptArtwork);
-        Task RefuseArtwork(long id, RefuseArtwork refuseArtwork);
+        Task AcceptArtwork(long id, AcceptArtwork acceptArtwork, string userName);
+        Task RefuseArtwork(long id, RefuseArtwork refuseArtwork, string userName);
         bool GetStatusIsActiveArtwork(long id);
         bool GetStatusIsDeleteArtwork(long id);
         Task DownloadImage(string firebaseUrl, string customFolderPath);

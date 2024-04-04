@@ -59,14 +59,12 @@ namespace be_project_swp.Controllers
             {
                 var accpetArtwork = new AcceptArtwork();
                 string userName = HttpContext.User.Identity.Name;
-                string userId = await _authService.GetCurrentUserId(userName);
                 var checkIsDelete = _artworkService.GetStatusIsDeleteArtwork(id);
                 if (checkIsDelete is true)
                 {
                     return BadRequest("Artwork was refuse so you can accept this artwork");
                 }
-                await _logService.SaveNewLog(userId, "Accept Artwork");
-                await _artworkService.AcceptArtwork(id, accpetArtwork);
+                await _artworkService.AcceptArtwork(id, accpetArtwork, userName);
                 return Ok("Accept Artwork Successfully");
             }
             catch
@@ -83,14 +81,12 @@ namespace be_project_swp.Controllers
             try
             {
                 string userName = HttpContext.User.Identity.Name;
-                string userId = await _authService.GetCurrentUserId(userName);
                 var checkIsActive = _artworkService.GetStatusIsActiveArtwork(id);
                 if (checkIsActive is true)
                 {
                     return BadRequest("Artwork was accpet so you can refuse this artwork");
                 }
-                await _logService.SaveNewLog(userId, "Refuse Artwork");
-                await _artworkService.RefuseArtwork(id, refuseArtwork);
+                await _artworkService.RefuseArtwork(id, refuseArtwork, userName);
                 return Ok("Refuse Artwork Successfully");
             }
             catch
@@ -112,8 +108,7 @@ namespace be_project_swp.Controllers
                 {
                     return BadRequest("You can not update status of you");
                 }
-                await _logService.SaveNewLog(userName, "Update Status User");
-                await _userService.UpdateUser(updateUser, user_Id);
+                await _userService.UpdateUser(updateUser, user_Id, userName);
                 return Ok("Update Status User Successfully");
             }
             catch
