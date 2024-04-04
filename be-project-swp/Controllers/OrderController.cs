@@ -35,6 +35,22 @@ namespace be_project_swp.Controllers
         }
 
         [HttpGet]
+        [Route("get-bill-request")]
+        [Authorize]
+        public async Task<IActionResult> GetBillRequest(long id)
+        {
+            try
+            {
+                var bill = await _orderService.GetBillRequest(id);
+                return Ok(bill);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
         [Route("get-payment-history")]
         [Authorize]
         public async Task<IActionResult> GetPaymentHistory()

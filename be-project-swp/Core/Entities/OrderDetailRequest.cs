@@ -13,7 +13,9 @@ namespace be_project_swp.Core.Entities
         public string NickName_Receivier { get; set; }
         public double Price { get; set; }
         public string Url_Image { get; set; }
+        public bool IsPayment { get; set; }
         public string Text { get; set; }
+        public string Text_Result { get; set; }
         public ApplicationUser User { get; set; }
         [ForeignKey("Payment_Id")]
         public Payment Payment { get; set; }

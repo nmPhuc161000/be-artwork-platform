@@ -13,6 +13,9 @@ namespace be_artwork_sharing_platform.Core.Dtos.RequestOrder
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
+        public bool IsSendResult { get; set; }
+        public bool IsPayment { get; set; }
+        public string Text_Result { get; set; }
         public StatusRequest StatusRequest { get; set; }
     }
 }

@@ -77,5 +77,19 @@ namespace be_project_swp.Core.Services
                 .ToListAsync();
             return orders;
         }
+
+        public async Task<GetResultAfterRequestPayment> GetBillRequest(long id)
+        {
+            var requestBill = await _context.OrderDetails.FirstOrDefaultAsync(o => o.Id == id);
+            var bill = new GetResultAfterRequestPayment()
+            {
+                NickName_Receivier = requestBill.NickName_Receivier,
+                Url_Image = requestBill.Url_Image,
+                Price = requestBill.Price,
+                Text_Result = requestBill.Text,
+                Date_Purchased = requestBill.CreatedAt
+            };
+            return bill;
+        }
     }
 }
