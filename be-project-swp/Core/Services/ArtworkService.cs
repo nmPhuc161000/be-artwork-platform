@@ -159,11 +159,12 @@ namespace be_artwork_sharing_platform.Core.Services
             }
         }
 
-        public async Task AcceptArtwork(long id, AcceptArtwork acceptArtwork)
+        public async Task AcceptArtwork(long id, AcceptArtwork acceptArtwork, string userName)
         {
             var accept = await _context.Artworks.FirstOrDefaultAsync(a => a.Id == id);
             if (accept is not null)
             {
+                await _logService.SaveNewLog(userName, "Accept Artwork");
                 accept.IsActive = acceptArtwork.IsActive;
                 accept.ReasonRefuse = "Processed by Admin";
             }
@@ -171,11 +172,12 @@ namespace be_artwork_sharing_platform.Core.Services
             _context.SaveChanges();
         }
 
-        public async Task RefuseArtwork(long id, RefuseArtwork refuseArtwork)
+        public async Task RefuseArtwork(long id, RefuseArtwork refuseArtwork, string userName)
         {
             var refuse = await _context.Artworks.FirstOrDefaultAsync(a => a.Id == id);
             if(refuse is not null)
             {
+                await _logService.SaveNewLog(userName, "Refuse Artwork");
                 refuse.IsDeleted = true;
                 refuse.ReasonRefuse = refuseArtwork.Reason;
             }

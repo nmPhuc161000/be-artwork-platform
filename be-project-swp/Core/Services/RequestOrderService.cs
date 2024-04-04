@@ -44,7 +44,7 @@ namespace be_artwork_sharing_platform.Core.Services
             return requestDto;
         }
 
-        public async Task<GeneralServiceResponseDto> SendRequesrOrder(SendRequest sendRequest, string userId_Sender, string nickName_Sender, string nickName_Receivier)
+        public async Task<GeneralServiceResponseDto> SendRequesrOrder(SendRequest sendRequest, string userId_Sender, string nickName_Sender, string nickName_Receivier, string userName)
         {
             try
             {
@@ -82,6 +82,7 @@ namespace be_artwork_sharing_platform.Core.Services
                         };
                         await _context.RequestOrders.AddAsync(request);
                         await _context.SaveChangesAsync();
+                        await _logService.SaveNewLog(userName, "Send Order Request");
                         return new GeneralServiceResponseDto()
                         {
                             IsSucceed = true,
@@ -157,7 +158,7 @@ namespace be_artwork_sharing_platform.Core.Services
             return null;
         }
 
-        public async Task<GeneralServiceResponseDto> AcceptRquest(long id, UpdateRequest updateRequest, string nickName_Receivier, string userId)
+        public async Task<GeneralServiceResponseDto> AcceptRquest(long id, UpdateRequest updateRequest, string nickName_Receivier, string userName)
         {
             try
             {
@@ -207,7 +208,7 @@ namespace be_artwork_sharing_platform.Core.Services
                             request.IsActive = updateRequest.IsActive;
                             _context.Update(request);
                             _context.SaveChanges();
-                            await _logService.SaveNewLog(userId, "Accept Request");
+                            await _logService.SaveNewLog(userName, "Accept Request");
                             return new GeneralServiceResponseDto()
                             {
                                 IsSucceed = true,
@@ -224,7 +225,7 @@ namespace be_artwork_sharing_platform.Core.Services
             }
         }
 
-        public async Task<GeneralServiceResponseDto> CancelRequestByReceivier(long id, CancelRequest cancelRequest, string nickName_Receivier, string userId)
+        public async Task<GeneralServiceResponseDto> CancelRequestByReceivier(long id, CancelRequest cancelRequest, string nickName_Receivier, string userName)
         {
             try
             {
@@ -274,7 +275,7 @@ namespace be_artwork_sharing_platform.Core.Services
                             request.IsDeleted = cancelRequest.IsDelete;
                             _context.Update(request);
                             _context.SaveChanges();
-                            await _logService.SaveNewLog(userId, "Cancel Request");
+                            await _logService.SaveNewLog(userName, "Cancel Request");
                             return new GeneralServiceResponseDto()
                             {
                                 IsSucceed = true,
@@ -291,11 +292,12 @@ namespace be_artwork_sharing_platform.Core.Services
             }
         }
 
-        public async Task UpdateStatusRequest(long id, string user_Id, UpdateStatusRequest updateStatusRequest)
+        public async Task UpdateStatusRequest(long id, string NickName_Receivier, UpdateStatusRequest updateStatusRequest, string userName)
         {
-            var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.UserId_Sender == user_Id);
+            var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.NickName_Receivier == NickName_Receivier);
             if (request is not null)
             {
+                await _logService.SaveNewLog(userName, "Update Status Request");
                 request.StatusRequest = updateStatusRequest.StatusRequest;
             }
             _context.Update(request);
@@ -318,11 +320,12 @@ namespace be_artwork_sharing_platform.Core.Services
             return false;
         }
 
-        public int DeleteRequestBySender(long id, string userId)
+        public async Task<int> DeleteRequestBySender(long id, string userId, string userName)
         {
             var request = _context.RequestOrders.FirstOrDefault(o => o.Id == id && o.UserId_Sender == userId);
             if (request is not null)
             {
+                await _logService.SaveNewLog(userName, "Delete Request");
                 _context.Remove(request);
                 return _context.SaveChanges();
             }

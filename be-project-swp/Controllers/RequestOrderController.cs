@@ -51,7 +51,7 @@ namespace be_artwork_sharing_platform.Controllers
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
                 string nickNameResquest = await _authService.GetCurrentNickName(userName);
-                var ressult = await _requestOrderService.SendRequesrOrder(sendRequest, userId, nickNameResquest, nick_Name);
+                var ressult = await _requestOrderService.SendRequesrOrder(sendRequest, userId, nickNameResquest, nick_Name, userName);
                 await _logService.SaveNewLog(userId, "Send Request Order");
                 return StatusCode(ressult.StatusCode, ressult.Message);
             }
@@ -128,9 +128,8 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 var cancelRequest = new CancelRequest();
                 string userName = HttpContext.User.Identity.Name;
-                string userId = await _authService.GetCurrentUserId(userName);
                 string currentNickName = await _authService.GetCurrentNickName(userName);
-                var result = await _requestOrderService.CancelRequestByReceivier(id, cancelRequest, currentNickName, userId);
+                var result = await _requestOrderService.CancelRequestByReceivier(id, cancelRequest, currentNickName, userName);
                 return StatusCode(result.StatusCode, result.Message);
             }
             catch(Exception ex) 
@@ -148,9 +147,8 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 var updateRequest = new UpdateRequest();
                 string userName = HttpContext.User.Identity.Name;
-                string userId = await _authService.GetCurrentUserId(userName);
                 string currentNickName = await _authService.GetCurrentNickName(userName);
-                var result = await _requestOrderService.AcceptRquest(id, updateRequest, currentNickName, userId);
+                var result = await _requestOrderService.AcceptRquest(id, updateRequest, currentNickName, userName);
                 return StatusCode(result.StatusCode, result.Message);
             }
             catch (Exception ex)
@@ -168,7 +166,8 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                await _requestOrderService.UpdateStatusRequest(id, userId, updateStatusRequest);
+                var nickName = await _authService.GetCurrentNickName(userName);
+                await _requestOrderService.UpdateStatusRequest(id, nickName, updateStatusRequest, userName);
                 return Ok("Update Request Successfully");
             }
             catch
@@ -193,9 +192,8 @@ namespace be_artwork_sharing_platform.Controllers
                 }
                 else
                 {
-                    var result = _requestOrderService.DeleteRequestBySender(id, userId);
+                    var result = await _requestOrderService.DeleteRequestBySender(id, userId, userName);
                     if (result == 0) return NotFound("Request Not Found");
-                    await _logService.SaveNewLog(userId, "Delete Request");
                     return Ok("Delete Request Successfully");
                 }
             }

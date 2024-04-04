@@ -8,7 +8,7 @@ namespace be_artwork_sharing_platform.Core.Interfaces
     {
         IEnumerable<Category> GetAll();
         Category GetById(long id);
-        Task<GeneralServiceResponseDto> CreateCategory(CreateCategory category);
+        Task<GeneralServiceResponseDto> CreateCategory(CreateCategory category, string userName);
         int Delete(long id);
         Task<IEnumerable<string>> GetCategortNameListAsync();
     }
