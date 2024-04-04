@@ -12,10 +12,12 @@ namespace be_project_swp.Core.Entities
         public string Id { get; set; }
         public string Order_Id { get; set; }
         public string User_Id { get; set; }
-        public long Artwork_Id { get; set; }
+        public long? Artwork_Id { get; set; } 
+        public long? Request_Id { get; set; } 
         // RelationShip
-        public ApplicationUser User { get; set; }
-        public Artwork Artworks { get; set; }
-        public Order Order { get; set; }
+        public ApplicationUser User { get; set; } 
+        public Artwork Artworks { get; set; } 
+        public RequestOrder RequestOrders { get; set; }
+        public Order Order { get; set; } 
     }
 }

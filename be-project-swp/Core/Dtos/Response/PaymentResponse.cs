@@ -21,6 +21,14 @@ public class OrderAndTokenResponse
     public OrderResponse Order { get; set; }
 }
 
+public class OrderRequestAndTokenResponse
+{
+    public string AccessToken { get; set; }
+    public string User_Id { get; set; }
+    public long Request_Id { get; set; }
+    public OrderResponse Order { get; set; }
+}
+
 public class ResponsePayment
 {
     public bool IsSucceed { get; set; }

@@ -3,6 +3,7 @@ using be_project_swp.Core.Dtos.PayPal;
 using be_project_swp.Core.Dtos.Response;
 using be_project_swp.Core.Entities;
 using be_project_swp.Core.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Http.Headers;
@@ -14,44 +15,15 @@ namespace be_project_swp.Core.Services
     public class PayPalService : IPayPalService
     {
         private readonly HttpClient _httpClient;
-        private readonly IOptions<PayPalSettings> _paypalSettings;
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _context;
 
-        public PayPalService(HttpClient httpClient, IOptions<PayPalSettings> paypalSettings, IConfiguration configuration, ApplicationDbContext context)
+        public PayPalService(HttpClient httpClient, IConfiguration configuration, ApplicationDbContext context)
         {
             _httpClient = httpClient;
-            _paypalSettings = paypalSettings;
             _configuration = configuration;
             _context = context;
         }
-
-        /*        public async Task<OrderResponse> CreateOrder(decimal amount)
-                {
-                    string currency = "usd";
-                    var request = new HttpRequestMessage(HttpMethod.Post, "https://api.sandbox.paypal.com/v2/checkout/orders");
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await GetAccessToken());
-                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    var orderRequest = new
-                    {
-                        intent = "CAPTURE",
-                        purchase_units = new[]
-                        {
-                            new
-                            {
-                                amount = new
-                                {
-                                    currency_code = currency,
-                                    value = amount.ToString("0.00")
-                                }
-                            }
-                        }
-                    };
-
-                    request.Content = new StringContent(JsonSerializer.Serialize(orderRequest), Encoding.UTF8, "application/json");
-                    return await _httpClient.SendAsync(request);
-                }*/
 
         public async Task<OrderAndTokenResponse> CreateOrder(string user_Id, long artwork_Id, string nickName)
         {
@@ -127,11 +99,10 @@ namespace be_project_swp.Core.Services
                         Order_Id = orderId,
                         User_Id = user_Id,
                         Artwork_Id = artwork_Id,
-
                     };
                     _context.Payments.Add(payment);
                     _context.SaveChanges();
-                    var artwork = _context.Artworks.FirstOrDefault(a => a.Id == artwork_Id);
+                    var artwork = await _context.Artworks.FirstOrDefaultAsync(a => a.Id == artwork_Id);
                     artwork.IsPayment = true;
                     artwork.Owner = nickName;
                     var user = _context.Users.FirstOrDefault(u => u.Id == user_Id);

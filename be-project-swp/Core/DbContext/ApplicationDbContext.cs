@@ -24,6 +24,7 @@ namespace be_artwork_sharing_platform.Core.DbContext
         public DbSet<ResetPassword> ResetPasswords { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetailRequest> OrderDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -108,6 +109,12 @@ namespace be_artwork_sharing_platform.Core.DbContext
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<Payment>()
+                .HasOne(w => w.RequestOrders)
+                .WithMany(w => w.Payments)
+                .HasForeignKey(w => w.Request_Id)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Payment>()
                 .Property(p => p.Id).ValueGeneratedOnAdd();
 
             builder.Entity<Order>()
@@ -120,6 +127,12 @@ namespace be_artwork_sharing_platform.Core.DbContext
                 .HasOne(o => o.User)
                 .WithMany(o => o.RequestOrders)
                 .HasForeignKey(o => o.UserId_Sender);
+
+            builder.Entity<OrderDetailRequest>()
+                .HasOne(o => o.User)
+                .WithMany(o => o.OrderDetailRequests)
+                .HasForeignKey(o => o.User_Id)
+                .OnDelete(DeleteBehavior.NoAction);
         }        
     }
 }

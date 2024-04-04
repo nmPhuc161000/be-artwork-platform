@@ -1,15 +1,15 @@
-﻿using Amazon.Runtime.Internal.Util;
-using be_artwork_sharing_platform.Core.DbContext;
+﻿using be_artwork_sharing_platform.Core.DbContext;
 using be_artwork_sharing_platform.Core.Dtos.RequestOrder;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
-using be_project_swp.Core.Dtos.Email;
 using be_project_swp.Core.Dtos.RequestOrder;
 using be_project_swp.Core.Dtos.Response;
-using Microsoft.AspNetCore.Http;
+using be_project_swp.Core.Entities;
+using be_project_swp.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics.Eventing.Reader;
-using System.Net.WebSockets;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 namespace be_artwork_sharing_platform.Core.Services
 {
@@ -17,11 +17,15 @@ namespace be_artwork_sharing_platform.Core.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogService _logService;
+        private readonly IPayPalService _payPalService;
+        private readonly HttpClient _httpClient;
 
-        public RequestOrderService(ApplicationDbContext context, ILogService logService)
+        public RequestOrderService(ApplicationDbContext context, ILogService logService, IPayPalService payPalService, HttpClient httpClient)
         {
             _context = context;
             _logService = logService;
+            _payPalService = payPalService;
+            _httpClient = httpClient;
         }
 
         public async Task<RequestOrderDto> GetRequestById(long id)
@@ -520,7 +524,7 @@ namespace be_artwork_sharing_platform.Core.Services
                             orderRequest.Url_Image = sendResultRequest.Url_Image;
                             orderRequest.Price = sendResultRequest.Price;
                             orderRequest.Text_Result = sendResultRequest.Text;
-                            orderRequest.IsPayment = true;
+                            orderRequest.IsSendResult = true;
                             _context.RequestOrders.Update(orderRequest);
                             await _logService.SaveNewLog(userName, "Send Result Request");
                             await _context.SaveChangesAsync();
@@ -539,5 +543,113 @@ namespace be_artwork_sharing_platform.Core.Services
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<OrderRequestAndTokenResponse> CreatePaymentForRequest(string user_Id, long request_Id)
+        {
+            var requestOrder = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == request_Id);
+            if(requestOrder == null)
+            {
+                return null;
+            }
+            double amount = requestOrder.Price;
+            string currency = "usd";
+            string accessToken = await _payPalService.GetAccessToken();
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.sandbox.paypal.com/v2/checkout/orders");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent("", Encoding.UTF8, "application/json");
+            var orderRequest = new
+            {
+                intent = "CAPTURE",
+                purchase_units = new[]
+                {
+                    new
+                    {
+                        amount = new
+                        {
+                            currency_code = currency,
+                            value = amount.ToString("0.00")
+                        }
+                    }
+                }
+            };
+            request.Content = new StringContent(JsonSerializer.Serialize(orderRequest), Encoding.UTF8, "application/json");
+            var response = await _httpClient.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var orderResponse = JsonSerializer.Deserialize<OrderResponse>(jsonResponse);
+                return new OrderRequestAndTokenResponse
+                {
+                    AccessToken = accessToken,
+                    User_Id = user_Id,
+                    Request_Id = request_Id,
+                    Order = orderResponse
+                };
+            }
+            else
+            {
+                throw new Exception("Failed to create order.");
+            }
+        }
+
+        public async Task<ResponsePayment> IsPaymentCaptured(string orderId, string user_Id, long request_Id, string nickName)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await _payPalService.GetAccessToken());
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent("", Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var responseObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse);
+                if (responseObject.TryGetValue("status", out var status) && status.ToString() == "COMPLETED")
+                {
+                    var payment = new Payment()
+                    {
+                        Order_Id = orderId,
+                        User_Id = user_Id,
+                        Request_Id = request_Id
+                    };
+                    await _context.Payments.AddAsync(payment);
+                    await _context.SaveChangesAsync();
+                    var requesrOrder = _context.RequestOrders.FirstOrDefault(a => a.Id == request_Id);
+                    requesrOrder.IsPayment = true;
+                    var user = _context.Users.FirstOrDefault(u => u.Id == user_Id);
+                    var orderDetailRequest = new OrderDetailRequest()
+                    {
+                        User_Id = user_Id,
+                        Payment_Id = payment.Id,
+                        Request_Id = request_Id,
+                        NickName_Request = nickName,
+                        NickName_Receivier = requesrOrder.NickName_Receivier,
+                        Price = requesrOrder.Price,
+                        Url_Image = requesrOrder.Url_Image,
+                        Text = requesrOrder.Text
+                    };
+                    _context.OrderDetails.Add(orderDetailRequest);
+                    _context.SaveChanges();
+                    return new ResponsePayment()
+                    {
+                        IsSucceed = true,
+                        StatusCode = 201,
+                        Order_Id = orderDetailRequest.Id,
+                        Message = "Payment successfully captured."
+                    };
+                }
+            }
+            return new ResponsePayment()
+            {
+                IsSucceed = false,
+                StatusCode = 400,
+                Order_Id = 0,
+                Message = "Payment failed."
+            };
+        }
+
+
     }
 }

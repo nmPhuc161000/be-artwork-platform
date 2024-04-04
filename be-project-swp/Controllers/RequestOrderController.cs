@@ -1,10 +1,15 @@
 ﻿using be_artwork_sharing_platform.Core.Constancs;
+using be_artwork_sharing_platform.Core.DbContext;
 using be_artwork_sharing_platform.Core.Dtos.RequestOrder;
 using be_artwork_sharing_platform.Core.Interfaces;
 using be_project_swp.Core.Dtos.RequestOrder;
 using be_project_swp.Core.Dtos.Response;
+using be_project_swp.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace be_artwork_sharing_platform.Controllers
 {
@@ -15,12 +20,18 @@ namespace be_artwork_sharing_platform.Controllers
         private readonly IRequestOrderService _requestOrderService;
         private readonly ILogService _logService;
         private readonly IAuthService _authService;
+        private readonly ApplicationDbContext _context;
+        private readonly IPayPalService _payPalService;
+        private readonly HttpClient _httpClient;
 
-        public RequestOrderController(IRequestOrderService requestOrderService, ILogService logService, IAuthService authService)
+        public RequestOrderController(IRequestOrderService requestOrderService, ILogService logService, IAuthService authService, ApplicationDbContext context, IPayPalService payPalService, HttpClient httpClient)
         {
             _requestOrderService = requestOrderService;
             _logService = logService;
             _authService = authService;
+            _context = context;
+            _payPalService = payPalService;
+            _httpClient = httpClient;
         }
 
         [HttpGet]
@@ -209,6 +220,93 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost]
+        [Route("create-payment-request")]
+        [Authorize]
+        public async Task<IActionResult> CreatePaymentRequest(long request_Id)
+        {
+            try
+            {
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                string nickName = await _authService.GetCurrentNickName(userName);
+                var request = await _context.RequestOrders.FirstOrDefaultAsync(a => a.Id == request_Id);
+                if (request != null)
+                {
+                    if (request.NickName_Receivier == nickName)
+                    {
+                        return BadRequest("You can not pay your request");
+                    }
+                    var orderResponse = await _requestOrderService.CreatePaymentForRequest(userId, request_Id);
+                    return Ok(orderResponse);
+                }
+                else
+                {
+                    return NotFound("Request not found");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Route("capture-payment-request")]
+        [Authorize]
+        public async Task<ActionResult<ResponsePayment>> CapturePayment(string orderId, long request_Id)
+        {
+            try
+            {
+                string userName = HttpContext.User.Identity.Name;
+                string userId = await _authService.GetCurrentUserId(userName);
+                string nickName = await _authService.GetCurrentNickName(userName);
+                var orderCreated = await _payPalService.IsOrderCreated(orderId);
+                if (!orderCreated)
+                {
+                    return BadRequest(new { Message = "Order not found or not yet created." });
+                }
+                var response = await SendCaptureRequest(orderId);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await _requestOrderService.IsPaymentCaptured(orderId, userId, request_Id, nickName);
+                    if (result.IsSucceed)
+                    {
+                        return Ok(new ResponsePayment()
+                        {
+                            IsSucceed = result.IsSucceed,
+                            StatusCode = result.StatusCode,
+                            Message = result.Message,
+                            Order_Id = result.Order_Id
+                        });
+                    }
+                    else
+                    {
+                        return BadRequest(new { Message = "Payment failed." });
+                    }
+                }
+                else
+                {
+                    return BadRequest(new { Message = "Failed to capture payment." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        private async Task<HttpResponseMessage> SendCaptureRequest(string orderId)
+        {
+            var accessToken = await _payPalService.GetAccessToken();
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.sandbox.paypal.com/v2/checkout/orders/{orderId}/capture");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent("", Encoding.UTF8, "application/json");
+
+            return await _httpClient.SendAsync(request);
         }
     }
 }

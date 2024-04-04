@@ -1,4 +1,5 @@
 ﻿using be_project_swp.Core.Dtos.RequestOrder;
+using be_project_swp.Core.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography;
@@ -25,8 +26,11 @@ namespace be_artwork_sharing_platform.Core.Entities
         public double Price { get; set; } = 0;
         public string Url_Image { get; set; } = string.Empty;
         public string Text_Result { get; set; } = string.Empty;
+        public bool IsSendResult { get; set; } = false;
 
         //Relationship
         public ApplicationUser User { get; set; }
+        public List<Payment> Payments { get; set; }
+        public List<OrderDetailRequest> OrderDetailRequests { get; set; }
     }
 }
