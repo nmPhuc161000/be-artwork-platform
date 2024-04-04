@@ -138,6 +138,11 @@ namespace be_artwork_sharing_platform.Core.Services
                     IsActive = f.IsActive,
                     IsDeleted = f.IsDeleted,
                     StatusRequest = f.StatusRequest,
+                    IsPayment = f.IsPayment,
+                    IsSendResult = f.IsSendResult,
+                    Text_Result = f.Text_Result,
+                    Url_Image = f.Url_Image,
+                    Price = f.Price
                 }).ToList();
             return request;
         }
@@ -162,7 +167,8 @@ namespace be_artwork_sharing_platform.Core.Services
                     IsSendResult = request.IsSendResult,
                     IsPayment = request.IsPayment,
                     Text_Result = request.Text_Result,
-                    Url_Image = request.Url_Image
+                    Url_Image = request.Url_Image,
+                    Price = request.Price
                 };
                 return requestDto;
             }

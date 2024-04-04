@@ -16,7 +16,6 @@ namespace be_project_swp.Core.Entities
         public string Name_Artwork { get; set; }
         public string Category_Artwork { get; set; }
         public ApplicationUser User { get; set; }
-        [ForeignKey("Payment_Id")]
         public Payment Payment { get; set; }
         [ForeignKey("Artwork_Id")]
         public Artwork Artwork { get; set; }

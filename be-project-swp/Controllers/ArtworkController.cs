@@ -208,7 +208,7 @@ namespace be_artwork_sharing_platform.Controllers
             }
         }
 
-        [HttpGet]
+        /*[HttpGet]
         [Route("download")]
         public async Task<IActionResult> DownloadImageFromFirebase(string firebaseUrl)
         {
@@ -240,32 +240,32 @@ namespace be_artwork_sharing_platform.Controllers
             {
                 return StatusCode(500, "An error occurred: " + ex.Message);
             }
-        }
+        }*/
 
-        /*        [HttpGet]
-                [Route("download")]
-                public async Task<IActionResult> DownloadImageFromFirebase(string firebaseUrl)
+        [HttpGet]
+        [Route("download")]
+        public async Task<IActionResult> DownloadImageFromFirebase(string firebaseUrl)
+        {
+            try
+            {
+                var client = _clientFactory.CreateClient();
+
+                HttpResponseMessage response = await client.GetAsync(firebaseUrl);
+                if (response.IsSuccessStatusCode)
                 {
-                    try
-                    {
-                        var client = _clientFactory.CreateClient();
-
-                        HttpResponseMessage response = await client.GetAsync(firebaseUrl);
-                        if (response.IsSuccessStatusCode)
-                        {
-                            Stream imageStream = await response.Content.ReadAsStreamAsync();
-                            return File(imageStream, "application/octet-stream", "image.jpg");
-                        }
-                        else
-                        {
-                            return NotFound("Image not found");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        return StatusCode(500, "An error occurred: " + ex.Message);
-                    }
-                }*/
+                    Stream imageStream = await response.Content.ReadAsStreamAsync();
+                    return File(imageStream, "application/octet-stream", "image.jpg");
+                }
+                else
+                {
+                    return NotFound("Image not found");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred: " + ex.Message);
+            }
+        }
 
         /*[HttpGet]
         [Route("download")]
