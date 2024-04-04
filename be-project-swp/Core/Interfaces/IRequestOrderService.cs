@@ -14,7 +14,7 @@ namespace be_artwork_sharing_platform.Core.Interfaces
         IEnumerable<ReceiveRequestDto> GetMineOrderByNickName(string nickName);
         Task<GeneralServiceResponseDto> AcceptRquest(long id, UpdateRequest updateRequest, string nickName_Receivier, string userName);
         Task<GeneralServiceResponseDto> CancelRequestByReceivier(long id, CancelRequest cancelRequest, string nickName_Receivier, string userName);
-        Task UpdateStatusRequest(long id, string user_Id, UpdateStatusRequest updateStatusRequest, string userName);
+        Task<GeneralServiceResponseDto> UpdateStatusRequest(long id, string user_Id, UpdateStatusRequest updateStatusRequest, string userName);
         Task<int> DeleteRequestBySender(long id, string user_Name, string userName);
         StatusRequest GetStatusRequestByUserNameRequest(long id, string userNames);
         Task<bool> GetActiveRequestByUserNameRequest(long id, string userNames);
