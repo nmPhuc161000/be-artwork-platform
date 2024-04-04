@@ -52,7 +52,6 @@ namespace be_artwork_sharing_platform.Controllers
                 string userId = await _authService.GetCurrentUserId(userName);
                 string nickNameResquest = await _authService.GetCurrentNickName(userName);
                 var ressult = await _requestOrderService.SendRequesrOrder(sendRequest, userId, nickNameResquest, nick_Name, userName);
-                await _logService.SaveNewLog(userId, "Send Request Order");
                 return StatusCode(ressult.StatusCode, ressult.Message);
             }
             catch(Exception ex) 
@@ -200,6 +199,24 @@ namespace be_artwork_sharing_platform.Controllers
             catch
             {
                 return BadRequest("Delete Request Failed");
+            }
+        }
+
+        [HttpPatch]
+        [Route("send-result-artwork")]
+        [Authorize(Roles = StaticUserRole.CREATOR)]
+        public async Task<ActionResult<GeneralServiceResponseDto>> SendResultRequest(SendResultRequest sendResultRequest, long id)
+        {
+            try
+            {
+                string userName = HttpContext.User.Identity.Name;
+                string nickName = await _authService.GetCurrentNickName(userName);
+                var result = await _requestOrderService.SendResultRequest(sendResultRequest, id, nickName, userName);
+                return StatusCode(result.StatusCode, result.Message);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }
