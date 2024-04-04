@@ -18,6 +18,8 @@ namespace be_project_swp.Core.Entities
         public ApplicationUser User { get; set; } 
         public Artwork Artworks { get; set; } 
         public RequestOrder RequestOrders { get; set; }
-        public Order Order { get; set; } 
+        /*public Order Order { get; set; } */
+        public List<Order> Orders { get; set; }
+
     }
 }

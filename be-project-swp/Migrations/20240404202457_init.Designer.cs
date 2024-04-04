@@ -12,8 +12,8 @@ using be_artwork_sharing_platform.Core.DbContext;
 namespace be_project_swp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240404162221_update-init")]
-    partial class updateinit
+    [Migration("20240404202457_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -528,8 +528,7 @@ namespace be_project_swp.Migrations
 
                     b.HasIndex("Artwork_Id");
 
-                    b.HasIndex("Payment_Id")
-                        .IsUnique();
+                    b.HasIndex("Payment_Id");
 
                     b.HasIndex("User_Id");
 
@@ -553,6 +552,12 @@ namespace be_project_swp.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPayment")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSendResult")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NickName_Receivier")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -572,6 +577,10 @@ namespace be_project_swp.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Text_Result")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -819,9 +828,9 @@ namespace be_project_swp.Migrations
                         .IsRequired();
 
                     b.HasOne("be_project_swp.Core.Entities.Payment", "Payment")
-                        .WithOne("Order")
-                        .HasForeignKey("be_project_swp.Core.Entities.Order", "Payment_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany("Orders")
+                        .HasForeignKey("Payment_Id")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("be_artwork_sharing_platform.Core.Entities.ApplicationUser", "User")
@@ -938,8 +947,7 @@ namespace be_project_swp.Migrations
 
             modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>
                 {
-                    b.Navigation("Order")
-                        .IsRequired();
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

@@ -525,8 +525,7 @@ namespace be_project_swp.Migrations
 
                     b.HasIndex("Artwork_Id");
 
-                    b.HasIndex("Payment_Id")
-                        .IsUnique();
+                    b.HasIndex("Payment_Id");
 
                     b.HasIndex("User_Id");
 
@@ -826,9 +825,9 @@ namespace be_project_swp.Migrations
                         .IsRequired();
 
                     b.HasOne("be_project_swp.Core.Entities.Payment", "Payment")
-                        .WithOne("Order")
-                        .HasForeignKey("be_project_swp.Core.Entities.Order", "Payment_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany("Orders")
+                        .HasForeignKey("Payment_Id")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("be_artwork_sharing_platform.Core.Entities.ApplicationUser", "User")
@@ -945,8 +944,7 @@ namespace be_project_swp.Migrations
 
             modelBuilder.Entity("be_project_swp.Core.Entities.Payment", b =>
                 {
-                    b.Navigation("Order")
-                        .IsRequired();
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }
