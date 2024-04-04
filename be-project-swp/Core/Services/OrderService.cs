@@ -70,6 +70,7 @@ namespace be_project_swp.Core.Services
                     NickName_Seller = o.NickName_Seller,
                     Name_Artwork = o.Name_Artwork,
                     Url_Image = o.Url_Image,
+                    Purchase_Date = o.CreatedAt,
                     Price= o.Price,
                 })
                 .OrderBy(o =>o.NickNme_Buyer)
