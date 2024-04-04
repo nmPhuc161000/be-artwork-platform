@@ -159,19 +159,19 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpPatch]
         [Route("update-status-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> UpdateStatusRequest(long id, UpdateStatusRequest updateStatusRequest)
+        public async Task<ActionResult<GeneralServiceResponseDto>> UpdateStatusRequest(long id, UpdateStatusRequest updateStatusRequest)
         {
             try
             {
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
                 var nickName = await _authService.GetCurrentNickName(userName);
-                await _requestOrderService.UpdateStatusRequest(id, nickName, updateStatusRequest, userName);
-                return Ok("Update Request Successfully");
+                var result = await _requestOrderService.UpdateStatusRequest(id, nickName, updateStatusRequest, userName);
+                return StatusCode(result.StatusCode, result.Message);
             }
-            catch
+            catch (Exception ex)
             {
-                return BadRequest("Something went wrong");
+                return BadRequest(ex.Message);
             }
         }
 

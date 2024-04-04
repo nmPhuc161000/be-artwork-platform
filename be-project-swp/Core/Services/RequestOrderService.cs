@@ -3,8 +3,10 @@ using be_artwork_sharing_platform.Core.DbContext;
 using be_artwork_sharing_platform.Core.Dtos.RequestOrder;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
+using be_project_swp.Core.Dtos.Email;
 using be_project_swp.Core.Dtos.RequestOrder;
 using be_project_swp.Core.Dtos.Response;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Net.WebSockets;
 
@@ -292,16 +294,108 @@ namespace be_artwork_sharing_platform.Core.Services
             }
         }
 
-        public async Task UpdateStatusRequest(long id, string NickName_Receivier, UpdateStatusRequest updateStatusRequest, string userName)
+        public async Task<GeneralServiceResponseDto> UpdateStatusRequest(long id, string NickName_Receivier, UpdateStatusRequest updateStatusRequest, string userName)
         {
-            var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.NickName_Receivier == NickName_Receivier);
-            if (request is not null)
+            try
             {
-                await _logService.SaveNewLog(userName, "Update Status Request");
-                request.StatusRequest = updateStatusRequest.StatusRequest;
+                var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id);
+                if (request is not null)
+                {
+                    if (request.NickName_Receivier != NickName_Receivier)
+                    {
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = false,
+                            StatusCode = 400,
+                            Message = "You cann't update this status request"
+                        };
+                    }
+                    else
+                    {
+                        if (request.StatusRequest == updateStatusRequest.StatusRequest)
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 400,
+                                Message = "You cann't select same status request"
+                            };
+                        }
+                        else
+                        {
+                            if (request.StatusRequest == StatusRequest.Waiting)
+                            {
+                                if (updateStatusRequest.StatusRequest == StatusRequest.Completed)
+                                {
+                                    return new GeneralServiceResponseDto()
+                                    {
+                                        IsSucceed = false,
+                                        StatusCode = 400,
+                                        Message = "You should choose the process in the correct order"
+                                    };
+                                }
+                                else
+                                {
+                                    await _logService.SaveNewLog(userName, "Update Status Request");
+                                    request.StatusRequest = updateStatusRequest.StatusRequest;
+                                    _context.RequestOrders.Update(request);
+                                    await _context.SaveChangesAsync();
+                                    return new GeneralServiceResponseDto()
+                                    {
+                                        IsSucceed = true,
+                                        StatusCode = 200,
+                                        Message = "Update Status Successfully"
+                                    };
+                                }
+                            }
+                            else if (request.StatusRequest == StatusRequest.Processing)
+                            {
+                                if (updateStatusRequest.StatusRequest == StatusRequest.Waiting)
+                                {
+                                    return new GeneralServiceResponseDto()
+                                    {
+                                        IsSucceed = false,
+                                        StatusCode = 400,
+                                        Message = "You cannot select the request status in the foreground"
+                                    };
+                                }
+                                else
+                                {
+                                    await _logService.SaveNewLog(userName, "Update Status Request");
+                                    request.StatusRequest = updateStatusRequest.StatusRequest;
+                                    _context.Update(request);
+                                    await _context.SaveChangesAsync();
+                                    return new GeneralServiceResponseDto()
+                                    {
+                                        IsSucceed = true,
+                                        StatusCode = 200,
+                                        Message = "Update Status Successfully"
+                                    };
+                                }
+                            }
+                            else if (request.StatusRequest == StatusRequest.Completed)
+                            {
+                                return new GeneralServiceResponseDto()
+                                {
+                                    IsSucceed = false,
+                                    StatusCode = 400,
+                                    Message = "Request Order has been completed so you can no longer update your order"
+                                };
+                            }
+                        }
+                    }
+                }
+                return new GeneralServiceResponseDto()
+                {
+                    IsSucceed = false,
+                    StatusCode = 404,
+                    Message = "Request Order not found"
+                };
             }
-            _context.Update(request);
-            await _context.SaveChangesAsync();
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public StatusRequest GetStatusRequestByUserNameRequest(long id, string userId)
