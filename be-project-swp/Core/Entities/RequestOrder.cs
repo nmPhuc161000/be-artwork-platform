@@ -6,8 +6,14 @@ using System.Security.Cryptography;
 namespace be_artwork_sharing_platform.Core.Entities
 {
     [Table("requestorders")]
-    public class RequestOrder : BaseEntity<long>
+    public class RequestOrder
     {
+        [Key]
+        public long Id { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public bool IsActive { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
         public string NickName_Sender { get; set; }
         public string NickName_Receivier { get; set; }
         public string UserId_Sender { get; set; }

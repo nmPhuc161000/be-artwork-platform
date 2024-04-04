@@ -51,30 +51,13 @@ namespace be_artwork_sharing_platform.Controllers
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
                 string nickNameResquest = await _authService.GetCurrentNickName(userName);
-                if(nickNameResquest == nick_Name)
-                {
-                    return BadRequest(new GeneralServiceResponseDto()
-                    {
-                        IsSucceed = false,
-                        StatusCode = 400,
-                        Message = "You can not request you"
-                    });
-                }
-                else
-                {
-                    await _logService.SaveNewLog(userId, "Send Request Order");
-                    await _requestOrderService.SendRequesrOrder(sendRequest, userId, nickNameResquest, nick_Name);
-                    return Ok(new GeneralServiceResponseDto()
-                    {
-                        IsSucceed = true,
-                        StatusCode = 200,
-                        Message = "Send Request to Order Artwork Successfully"
-                    });
-                }
+                var ressult = await _requestOrderService.SendRequesrOrder(sendRequest, userId, nickNameResquest, nick_Name);
+                await _logService.SaveNewLog(userId, "Send Request Order");
+                return StatusCode(ressult.StatusCode, ressult.Message);
             }
-            catch
+            catch(Exception ex) 
             {
-                return BadRequest("Send Request Failed");
+                return BadRequest(ex.Message);
             }
         }
 
@@ -139,40 +122,40 @@ namespace be_artwork_sharing_platform.Controllers
         [HttpPatch]
         [Route("cancel-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> CancelRequest(long id)
+        public async Task<ActionResult<GeneralServiceResponseDto>> CancelRequest(long id)
         {
             try
             {
                 var cancelRequest = new CancelRequest();
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                await _logService.SaveNewLog(userId, "Cancel Request");
-                await _requestOrderService.CancelRequestByReceivier(id, cancelRequest, userId);
-                return Ok("Cancel Request Successfully");
+                string currentNickName = await _authService.GetCurrentNickName(userName);
+                var result = await _requestOrderService.CancelRequestByReceivier(id, cancelRequest, currentNickName, userId);
+                return StatusCode(result.StatusCode, result.Message);
             }
-            catch
+            catch(Exception ex) 
             {
-                return BadRequest("Something went wrong");
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpPatch]
         [Route("update-request")]
         [Authorize(Roles = StaticUserRole.CREATOR)]
-        public async Task<IActionResult> UpdateRequest(long id)
+        public async Task<ActionResult<GeneralServiceResponseDto>> AcceptRequest(long id)
         {
             try
             {
                 var updateRequest = new UpdateRequest();
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
-                await _logService.SaveNewLog(userId, "Update Request");
-                await _requestOrderService.UpdateRquest(id, updateRequest, userId);
-                return Ok("Update Request Successfully");
+                string currentNickName = await _authService.GetCurrentNickName(userName);
+                var result = await _requestOrderService.AcceptRquest(id, updateRequest, currentNickName, userId);
+                return StatusCode(result.StatusCode, result.Message);
             }
-            catch
+            catch (Exception ex)
             {
-                return BadRequest("Something went wrong");
+                return BadRequest(ex.Message);
             }
         }
 
@@ -186,7 +169,6 @@ namespace be_artwork_sharing_platform.Controllers
                 string userName = HttpContext.User.Identity.Name;
                 string userId = await _authService.GetCurrentUserId(userName);
                 await _requestOrderService.UpdateStatusRequest(id, userId, updateStatusRequest);
-                await _logService.SaveNewLog(userId, "Update Status Request");
                 return Ok("Update Request Successfully");
             }
             catch

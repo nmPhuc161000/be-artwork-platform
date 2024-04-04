@@ -1,19 +1,24 @@
-﻿using be_artwork_sharing_platform.Core.DbContext;
+﻿using Amazon.Runtime.Internal.Util;
+using be_artwork_sharing_platform.Core.DbContext;
 using be_artwork_sharing_platform.Core.Dtos.RequestOrder;
 using be_artwork_sharing_platform.Core.Entities;
 using be_artwork_sharing_platform.Core.Interfaces;
 using be_project_swp.Core.Dtos.RequestOrder;
+using be_project_swp.Core.Dtos.Response;
 using Microsoft.EntityFrameworkCore;
+using System.Net.WebSockets;
 
 namespace be_artwork_sharing_platform.Core.Services
 {
     public class RequestOrderService : IRequestOrderService
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogService _logService;
 
-        public RequestOrderService(ApplicationDbContext context)
+        public RequestOrderService(ApplicationDbContext context, ILogService logService)
         {
             _context = context;
+            _logService = logService;
         }
 
         public async Task<RequestOrderDto> GetRequestById(long id)
@@ -39,19 +44,57 @@ namespace be_artwork_sharing_platform.Core.Services
             return requestDto;
         }
 
-        public async Task SendRequesrOrder(SendRequest sendRequest, string userId_Sender, string nickName_Sender, string nickName_Receivier)
+        public async Task<GeneralServiceResponseDto> SendRequesrOrder(SendRequest sendRequest, string userId_Sender, string nickName_Sender, string nickName_Receivier)
         {
-            var request = new RequestOrder
+            try
             {
-                NickName_Sender = nickName_Sender,
-                NickName_Receivier = nickName_Receivier,
-                UserId_Sender = userId_Sender,
-                Email = sendRequest.Email,
-                PhoneNumber = sendRequest.PhoneNumber,
-                Text = sendRequest.Text
-            };
-            await _context.RequestOrders.AddAsync(request);
-            await _context.SaveChangesAsync();
+                var checkUser = await _context.Users.FirstOrDefaultAsync(u => u.NickName == nickName_Receivier);
+                if (checkUser == null)
+                {
+                    return new GeneralServiceResponseDto()
+                    {
+                        IsSucceed = false,
+                        StatusCode = 404,
+                        Message = "User not found"
+                    };
+                }
+                else
+                {
+                    if (nickName_Sender == nickName_Receivier)
+                    {
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = false,
+                            StatusCode = 400,
+                            Message = "You can not request you"
+                        };
+                    }
+                    else
+                    {
+                        var request = new RequestOrder
+                        {
+                            NickName_Sender = nickName_Sender,
+                            NickName_Receivier = nickName_Receivier,
+                            UserId_Sender = userId_Sender,
+                            Email = sendRequest.Email,
+                            PhoneNumber = sendRequest.PhoneNumber,
+                            Text = sendRequest.Text,
+                        };
+                        await _context.RequestOrders.AddAsync(request);
+                        await _context.SaveChangesAsync();
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = true,
+                            StatusCode = 200,
+                            Message = "Send Request to Order Artwork Successfully"
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public IEnumerable<ReceiveRequestDto> GetMineOrderByNickName(string nickName)
@@ -114,26 +157,138 @@ namespace be_artwork_sharing_platform.Core.Services
             return null;
         }
 
-        public async Task UpdateRquest(long id, UpdateRequest updateRequest, string user_Id)
+        public async Task<GeneralServiceResponseDto> AcceptRquest(long id, UpdateRequest updateRequest, string nickName_Receivier, string userId)
         {
-            var request = await _context.RequestOrders.FirstOrDefaultAsync(f => f.Id == id && f.UserId_Sender == user_Id);
-            if(request is not null)
+            try
             {
-                request.IsActive = updateRequest.IsActive;
+                var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id);
+                if (request is null)
+                {
+                    return new GeneralServiceResponseDto()
+                    {
+                        IsSucceed = false,
+                        StatusCode = 404,
+                        Message = "Order Request not found"
+                    };
+                }
+                else
+                {
+                    if (request.NickName_Receivier != nickName_Receivier)
+                    {
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = false,
+                            StatusCode = 400,
+                            Message = "You cann't accept this request"
+                        };
+                    }
+                    else
+                    {
+                        if (request.IsDeleted == true)
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 400,
+                                Message = "This request was refuse so you can accept this request"
+                            };
+                        }
+                        else if (request.IsActive == false)
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 400,
+                                Message = "This request was accept so you can accept this request again"
+                            };
+                        }
+                        else
+                        {
+                            request.IsActive = updateRequest.IsActive;
+                            _context.Update(request);
+                            _context.SaveChanges();
+                            await _logService.SaveNewLog(userId, "Accept Request");
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = true,
+                                StatusCode = 200,
+                                Message = "Accept this request successfully"
+                            };
+                        }
+                    }
+                }
             }
-            _context.Update(request);
-            _context.SaveChanges();
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
-        public async Task CancelRequestByReceivier(long id, CancelRequest cancelRequest, string user_Id)
+        public async Task<GeneralServiceResponseDto> CancelRequestByReceivier(long id, CancelRequest cancelRequest, string nickName_Receivier, string userId)
         {
-            var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id && r.UserId_Sender == user_Id);
-            if(request is not null)
+            try
             {
-                request.IsDeleted = cancelRequest.IsDelete;
+                var request = await _context.RequestOrders.FirstOrDefaultAsync(r => r.Id == id);
+                if (request is null)
+                {
+                    return new GeneralServiceResponseDto()
+                    {
+                        IsSucceed = false,
+                        StatusCode = 404,
+                        Message = "Order Request not found"
+                    };
+                }
+                else
+                {
+                    if (request.NickName_Receivier != nickName_Receivier)
+                    {
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = false,
+                            StatusCode = 400,
+                            Message = "You cann't refuse this request"
+                        };
+                    }
+                    else
+                    {
+                        if (request.IsActive == false)
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 400,
+                                Message = "This request was accept so you can refuse this request"
+                            };
+                        }
+                        else if (request.IsDeleted == true)
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 400,
+                                Message = "This request was refuse so you can refuse this request again"
+                            };
+                        }
+                        else
+                        {
+                            request.IsDeleted = cancelRequest.IsDelete;
+                            _context.Update(request);
+                            _context.SaveChanges();
+                            await _logService.SaveNewLog(userId, "Cancel Request");
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = true,
+                                StatusCode = 200,
+                                Message = "Refuse this request successfully"
+                            };
+                        }
+                    }
+                }
             }
-            _context.Update(request);
-            _context.SaveChanges();
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task UpdateStatusRequest(long id, string user_Id, UpdateStatusRequest updateStatusRequest)
