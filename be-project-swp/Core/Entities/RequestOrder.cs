@@ -22,6 +22,9 @@ namespace be_artwork_sharing_platform.Core.Entities
         public string PhoneNumber { get; set; }
         public bool IsPayment { get; set; } = false;
         public StatusRequest StatusRequest { get; set; } = StatusRequest.Waiting;
+        public double Price { get; set; } = 0;
+        public string Url_Image { get; set; } = string.Empty;
+        public string Text_Result { get; set; } = string.Empty;
 
         //Relationship
         public ApplicationUser User { get; set; }

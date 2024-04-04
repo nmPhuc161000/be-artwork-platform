@@ -331,5 +331,75 @@ namespace be_artwork_sharing_platform.Core.Services
             }
             return 0;
         }
+
+        public async Task<GeneralServiceResponseDto> SendResultRequest(SendResultRequest sendResultRequest, long id, string nickName_Receivier, string userName)
+        {
+            try
+            {
+                var orderRequest = await _context.RequestOrders.FirstOrDefaultAsync(o => o.Id == id);
+                if (orderRequest is null)
+                {
+                    return new GeneralServiceResponseDto()
+                    {
+                        IsSucceed = false,
+                        StatusCode = 404,
+                        Message = "Order Request not found"
+                    };
+                }
+                else
+                {
+                    if (orderRequest.NickName_Receivier != nickName_Receivier)
+                    {
+                        return new GeneralServiceResponseDto()
+                        {
+                            IsSucceed = false,
+                            StatusCode = 400,
+                            Message = "You cann't send result request"
+                        };
+                    }
+                    else
+                    {
+                        if (orderRequest.StatusRequest != StatusRequest.Completed)
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 400,
+                                Message = "The request has not been completed so the results cannot be sent"
+                            };
+                        }
+                        else if(orderRequest.IsPayment == true)
+                        {
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = false,
+                                StatusCode = 400,
+                                Message = "The request already sent the result"
+                            };
+                        }
+                        else
+                        {
+                            orderRequest.Url_Image = sendResultRequest.Url_Image;
+                            orderRequest.Price = sendResultRequest.Price;
+                            orderRequest.Text_Result = sendResultRequest.Text;
+                            orderRequest.IsPayment = true;
+                            _context.RequestOrders.Update(orderRequest);
+                            await _logService.SaveNewLog(userName, "Send Result Request");
+                            await _context.SaveChangesAsync();
+                            return new GeneralServiceResponseDto()
+                            {
+                                IsSucceed = true,
+                                StatusCode = 200,
+                                Message = "Send Artwork Successfully"
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
